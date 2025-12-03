@@ -1,4 +1,5 @@
 import { experienceData } from '@/data/experience'
+import { educationData } from '@/data/education'
 import { socialLinks, SocialPlatform } from '@/data/social'
 import { blogPosts } from '@/data/writing'
 import { bioParagraphs } from '@/data/bio'
@@ -128,6 +129,29 @@ export default function Home() {
                   ))}
                 </div>
               )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Education Section */}
+      <section className="mb-20">
+        <h2 className="text-xs uppercase tracking-wider text-gray-400 mb-6">
+          Education
+        </h2>
+        <div className="space-y-8">
+          {educationData.map((edu, index) => (
+            <div
+              key={index}
+              className="pl-4 border-l-2 border-gray-200 hover:border-gray-400 transition-colors"
+            >
+              <h3 className="text-gray-900 font-medium">{edu.institution}</h3>
+              <p className="text-gray-700 text-sm">{edu.degree}</p>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                <span className="text-xs text-gray-500 font-mono">
+                  {edu.period}
+                </span>
+              </div>
             </div>
           ))}
         </div>
