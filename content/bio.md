@@ -1,8 +1,9 @@
-Chief Technology Officer at [TAIKAI](https://taikai.network). Coder by day, Hacker by night.
+Chief Technology Officer at [LayerX](https://layerx.xyz). Building the infrastructure for decentralized innovation on Ethereum.
 
-Software engineer with expertise in blockchain, Web3, and full-stack development. Author of *Asynchronous Android Programming* (Packt Publishing, 2016).
+Architect of DeFi protocols and real-time systems. From trading engines at Euronext processing millions of orders to smart contracts securing on-chain capital—obsessed with systems that demand zero downtime.
 
-Electronic and Telecommunications Engineering degree from University of Aveiro. Active in the Web3 community as a speaker and event organizer, including "Vibe Coding for Creatives" events in Porto.
+Shipped [TAIKAI](https://taikai.network), [TAIKAI Garden](https://garden.taikai.network), [BakerFi](https://bakerfi.xyz), [Bepro Network](https://bepro.network), and other Web3 products. Published *Asynchronous Android Programming* (Packt, 2016). Master's in Electronic and Telecommunications Engineering from University of Aveiro.
 
-Specialized in blockchain development (Ethereum, EOS), distributed systems, and DApp architecture. Fluent in multiple programming languages including C++, Java, Ruby, Python, and JavaScript.
+Coder by day, Hacker by night.
 
+**Core Stack:** `Solidity` `TypeScript` `C++` `Java` `Rust` `Node.js` `Kubernetes`

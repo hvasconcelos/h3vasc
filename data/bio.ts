@@ -7,22 +7,36 @@ export interface BioParagraph {
   text: string
   links?: BioLink[]
   italicText?: string
+  technologies?: string[]
 }
 
 export const bioParagraphs: BioParagraph[] = [
   {
-    text: 'Chief Technology Officer at {link}. Coder by day, Hacker by night.',
-    links: [{ text: 'TAIKAI', url: 'https://taikai.network' }],
+    text: 'Chief Technology Officer at {link}. Building the infrastructure for decentralized innovation on Ethereum Ecosystems.',
+    links: [{ text: 'LayerX', url: 'https://layerx.xyz' }],
   },
   {
-    text: 'Software engineer with expertise in blockchain, Web3, and full-stack development. Author of {italic} (Packt Publishing, 2016).',
+    text: 'Architect of DeFi protocols and real-time systems. From trading engines at Euronext processing millions of orders to smart contracts securing on-chain capital obsessed with systems that demand zero downtime.',
+  },
+  {
+    text: 'Shipped {link1}, {link2}, {link3}, {link4}, and other Web3 products. ',
+    links: [
+      { text: 'TAIKAI', url: 'https://taikai.network' },
+      { text: 'TAIKAI Garden', url: 'https://garden.taikai.network' },
+      { text: 'BakerFi', url: 'https://bakerfi.xyz' },
+      { text: 'Bepro Network', url: 'https://bepro.network' },
+    ]
+  },
+  {
+    text: 'Published {italic} (Packt, 2016). Master\'s in Electronic and Telecommunications Engineering from University of Aveiro.',
     italicText: 'Asynchronous Android Programming',
   },
   {
-    text: 'Electronic and Telecommunications Engineering degree from University of Aveiro. Active in the Web3 community as a speaker and event organizer, including "Vibe Coding for Creatives" events in Porto.',
-  },
-  {
-    text: 'Specialized in blockchain development (Ethereum, EOS), distributed systems, and DApp architecture. Fluent in multiple programming languages including C++, Java, Ruby, Python, and JavaScript.',
-  },
+    text: 'Defi Wizard 🧙',
+
+  }, {
+    text: '',
+    technologies: ['Solidity', 'TypeScript', 'C++', 'Java', 'Rust', 'Node.js', 'Kubernetes'],
+  }
 ]
 

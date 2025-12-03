@@ -61,36 +61,92 @@ export default function Home() {
           About
         </h2>
         <div className="space-y-4 text-gray-700 leading-relaxed">
-          {bioParagraphs.map((paragraph, index) => (
-            <p key={index}>
-              {paragraph.links
-                ? paragraph.text.split('{link}').map((part, i, arr) => (
-                    <span key={i}>
-                      {part}
-                      {i < arr.length - 1 && paragraph.links?.[i] && (
-                        <a
-                          href={paragraph.links[i].url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-300 hover:border-gray-600"
-                        >
-                          {paragraph.links[i].text}
-                        </a>
-                      )}
-                    </span>
-                  ))
-                : paragraph.italicText
-                  ? paragraph.text.split('{italic}').map((part, i, arr) => (
-                      <span key={i}>
-                        {part}
-                        {i < arr.length - 1 && (
-                          <span className="italic">{paragraph.italicText}</span>
-                        )}
+          {bioParagraphs.map((paragraph, index) => {
+            // Parse text with placeholders: {link}, {link1}, {link2}, {italic}
+            const renderText = (text: string) => {
+              const parts: React.ReactNode[] = []
+              let remaining = text
+              let key = 0
+
+              while (remaining.length > 0) {
+                // Find the next placeholder
+                const linkMatch = remaining.match(/\{link(\d*)\}/)
+                const italicMatch = remaining.match(/\{italic\}/)
+
+                // Find which comes first
+                const linkIndex = linkMatch ? remaining.indexOf(linkMatch[0]) : -1
+                const italicIndex = italicMatch ? remaining.indexOf(italicMatch[0]) : -1
+
+                let nextIndex = -1
+                let matchType: 'link' | 'italic' | null = null
+                let matchStr = ''
+
+                if (linkIndex !== -1 && (italicIndex === -1 || linkIndex < italicIndex)) {
+                  nextIndex = linkIndex
+                  matchType = 'link'
+                  matchStr = linkMatch![0]
+                } else if (italicIndex !== -1) {
+                  nextIndex = italicIndex
+                  matchType = 'italic'
+                  matchStr = italicMatch![0]
+                }
+
+                if (nextIndex === -1) {
+                  // No more placeholders
+                  parts.push(<span key={key++}>{remaining}</span>)
+                  break
+                }
+
+                // Add text before placeholder
+                if (nextIndex > 0) {
+                  parts.push(<span key={key++}>{remaining.substring(0, nextIndex)}</span>)
+                }
+
+                // Add the placeholder content
+                if (matchType === 'link' && paragraph.links) {
+                  const linkNum = linkMatch![1] ? parseInt(linkMatch![1]) - 1 : 0
+                  const link = paragraph.links[linkNum]
+                  if (link) {
+                    parts.push(
+                      <a
+                        key={key++}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-300 hover:border-gray-600"
+                      >
+                        {link.text}
+                      </a>
+                    )
+                  }
+                } else if (matchType === 'italic' && paragraph.italicText) {
+                  parts.push(<span key={key++} className="italic">{paragraph.italicText}</span>)
+                }
+
+                remaining = remaining.substring(nextIndex + matchStr.length)
+              }
+
+              return parts
+            }
+
+            return (
+              <div key={index}>
+                <p>{renderText(paragraph.text)}</p>
+                {paragraph.technologies && paragraph.technologies.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {paragraph.technologies.map((tech) => (
+                      <span
+                        key={tech}
+                        className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded font-mono"
+                      >
+                        {tech}
                       </span>
-                    ))
-                  : paragraph.text}
-            </p>
-          ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       </section>
 
