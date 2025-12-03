@@ -2,7 +2,10 @@ import { experienceData } from '@/data/experience'
 import { educationData } from '@/data/education'
 import { socialLinks, SocialPlatform } from '@/data/social'
 import { blogPosts } from '@/data/writing'
-import { bioParagraphs } from '@/data/bio'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 const GitHubIcon = () => (
   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -45,6 +48,19 @@ const iconMap: Record<SocialPlatform, React.FC> = {
 }
 
 export default function Home() {
+  // Read bio markdown file
+  const bioPath = join(process.cwd(), 'content', 'bio.md')
+  const bioContent = readFileSync(bioPath, 'utf-8')
+
+  // Extract technologies from HTML comment
+  const techMatch = bioContent.match(/<!-- TECHNOLOGIES: (.+) -->/)
+  const technologies = techMatch
+    ? techMatch[1].split(',').map((tech) => tech.trim())
+    : []
+
+  // Remove technologies comment from markdown content
+  const markdownContent = bioContent.replace(/<!-- TECHNOLOGIES: .+ -->\s*/g, '')
+
   return (
     <main className="min-h-screen px-6 py-24 max-w-2xl mx-auto">
       {/* Header/Name */}
@@ -60,93 +76,24 @@ export default function Home() {
         <h2 className="text-xs uppercase tracking-wider text-gray-400 mb-6">
           About
         </h2>
-        <div className="space-y-4 text-gray-700 leading-relaxed">
-          {bioParagraphs.map((paragraph, index) => {
-            // Parse text with placeholders: {link}, {link1}, {link2}, {italic}
-            const renderText = (text: string) => {
-              const parts: React.ReactNode[] = []
-              let remaining = text
-              let key = 0
-
-              while (remaining.length > 0) {
-                // Find the next placeholder
-                const linkMatch = remaining.match(/\{link(\d*)\}/)
-                const italicMatch = remaining.match(/\{italic\}/)
-
-                // Find which comes first
-                const linkIndex = linkMatch ? remaining.indexOf(linkMatch[0]) : -1
-                const italicIndex = italicMatch ? remaining.indexOf(italicMatch[0]) : -1
-
-                let nextIndex = -1
-                let matchType: 'link' | 'italic' | null = null
-                let matchStr = ''
-
-                if (linkIndex !== -1 && (italicIndex === -1 || linkIndex < italicIndex)) {
-                  nextIndex = linkIndex
-                  matchType = 'link'
-                  matchStr = linkMatch![0]
-                } else if (italicIndex !== -1) {
-                  nextIndex = italicIndex
-                  matchType = 'italic'
-                  matchStr = italicMatch![0]
-                }
-
-                if (nextIndex === -1) {
-                  // No more placeholders
-                  parts.push(<span key={key++}>{remaining}</span>)
-                  break
-                }
-
-                // Add text before placeholder
-                if (nextIndex > 0) {
-                  parts.push(<span key={key++}>{remaining.substring(0, nextIndex)}</span>)
-                }
-
-                // Add the placeholder content
-                if (matchType === 'link' && paragraph.links) {
-                  const linkNum = linkMatch![1] ? parseInt(linkMatch![1]) - 1 : 0
-                  const link = paragraph.links[linkNum]
-                  if (link) {
-                    parts.push(
-                      <a
-                        key={key++}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-300 hover:border-gray-600"
-                      >
-                        {link.text}
-                      </a>
-                    )
-                  }
-                } else if (matchType === 'italic' && paragraph.italicText) {
-                  parts.push(<span key={key++} className="italic">{paragraph.italicText}</span>)
-                }
-
-                remaining = remaining.substring(nextIndex + matchStr.length)
-              }
-
-              return parts
-            }
-
-            return (
-              <div key={index}>
-                <p>{renderText(paragraph.text)}</p>
-                {paragraph.technologies && paragraph.technologies.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {paragraph.technologies.map((tech) => (
-                      <span
-                        key={tech}
-                        className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded font-mono"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
+        <div className="space-y-4 text-gray-700 leading-relaxed prose prose-sm max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              p: ({ node, ...props }) => <p className="mb-4 last:mb-0" {...props} />,
+              a: ({ node, ...props }) => (
+                <a
+                  className="text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-300 hover:border-gray-600"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  {...props}
+                />
+              ),
+              em: ({ node, ...props }) => <em className="italic" {...props} />,
+            }}
+          >
+            {markdownContent}
+          </ReactMarkdown>
         </div>
       </section>
 
