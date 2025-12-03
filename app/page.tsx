@@ -146,7 +146,7 @@ export default function Home() {
                 className="group block hover:translate-x-1 transition-transform"
               >
                 <h3 className="text-gray-900 group-hover:text-gray-600 transition-colors mb-1">
-                  {post.title}
+                📖 {post.title}
                 </h3>
                 <time className="text-xs text-gray-500 font-mono">
                   {post.date}
