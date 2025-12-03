@@ -6,6 +6,11 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    "title": "Inside BakerFi: Launching a Composable and Secure DeFi Vault Platform",
+    "date": "LayerX Blog, 2025",
+    "url": "https://blog.layerx.xyz/bakerfi-case-study"
+  },
+  {
     title: 'How to launch a Secure DeFi Protocol in 120 Days',
     date: 'LayerX Blog, 2025',
     url: 'https://blog.layerx.xyz/how-to-launch-secure-defi-protocol-in-120-days',

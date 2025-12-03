@@ -68,7 +68,7 @@ export default function Home() {
         <h1 className="text-4xl font-light tracking-tight text-gray-900 mb-2">
           Helder Vasconcelos
         </h1>
-        <p className="text-sm text-gray-500 font-mono">Porto, Portugal</p>
+        <p className="text-sm text-gray-500 font-mono">Porto, Portugal 🇵🇹</p>
       </header>
 
       {/* Bio Section */}
