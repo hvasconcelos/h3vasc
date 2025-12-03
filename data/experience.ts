@@ -64,6 +64,7 @@ export const experienceData: Experience[] = [
     period: 'Mar 2008 - Jun 2011',
     location: 'Aveiro e Região, Portugal',
     description: 'Product Management and Web Development.',
+    technologies: ['Brand Management', 'Audio Production', 'Marketing & Promotion'],
   }
 ]
 
