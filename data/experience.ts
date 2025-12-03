@@ -25,7 +25,7 @@ export const experienceData: Experience[] = [
     period: 'Nov 2016 - Nov 2018',
     location: 'Porto e Região, Portugal',
     description: 'Optiq Commercial Tech Lead. Building Optiq, a realtime trading engine for the European Stock Exchange.',
-    technologies: ['C++11/14', 'FIX', 'Apache Kafka', 'MySQL', 'Linux', 'Docker'],
+    technologies: ['C++11/14', 'FIX', 'Apache Kafka','High Frequency Trading', 'Linux', 'Docker'],
   },
   {
     company: 'Axway',
@@ -35,7 +35,7 @@ export const experienceData: Experience[] = [
     location: 'Dublin, Ireland',
     description:
       'Implementation, design and development of features for Axway APIGateway and API Manager. APIGateway application tuning for high level of demand usage scenarios. Cryptography and OpenSSL Programming. APIGateway Java and C/C++ integration with cryptographic external HSM devices.',
-    technologies: ['C++', 'Java', 'JNI', 'Docker', 'Jira', 'Git'],
+    technologies: ['C++', 'Java', 'HSM', 'JNI', 'Docker', 'OpenSSL', 'API Gateway'],
   },
   {
     company: 'Airtel ATN',
@@ -55,7 +55,7 @@ export const experienceData: Experience[] = [
     location: 'Aveiro, Portugal',
     description:
       'Designed and Developed IMS (IP Multimedia Subsystem), SMS and Mobile software solutions to Portugal Telecom Group. Supported other interns in various development and learning tasks. Collaborated with 24/7 support team solving production issues.',
-    technologies: ['C/C++', 'Java SE', 'Ruby+RoR', 'Perl'],
+    technologies: ['C/C++', 'Java SE', 'Ruby+RoR', 'SIP'],
   },
   {
     company: 'Monocline Records',
