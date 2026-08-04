@@ -65,11 +65,20 @@ export default function Home() {
   return (
     <main className="min-h-screen px-6 py-24 max-w-2xl mx-auto">
       {/* Header/Name */}
-      <header className="mb-12">
-        <h1 className="text-4xl font-light tracking-tight text-gray-900 mb-2">
-          Helder Vasconcelos
-        </h1>
-        <p className="text-sm text-gray-500 font-mono">Porto, Portugal 🇵🇹</p>
+      <header className="mb-12 flex items-center gap-5">
+        <img
+          src="/avatar.jpg"
+          alt="Helder Vasconcelos"
+          width={96}
+          height={96}
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover shrink-0 grayscale"
+        />
+        <div>
+          <h1 className="text-4xl font-light tracking-tight text-gray-900 mb-2">
+            Helder Vasconcelos
+          </h1>
+          <p className="text-sm text-gray-500 font-mono">Porto, Portugal 🇵🇹</p>
+        </div>
       </header>
 
       {/* Bio Section */}
