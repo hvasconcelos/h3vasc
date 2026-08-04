@@ -48,9 +48,9 @@
      rather than a hue. */
   --color-accent: #26251e;
 
-  /* The one chromatic value on the site: phosphor green, used only by the
-     block caret that trails the name. */
-  --color-caret: #0f7d45;
+  /* The one chromatic value on the site: phosphor green, used by the block
+     caret and the section labels. */
+  --color-terminal: #0f7d45;
 
   --color-gray-50: #f2f2ef;
   --color-gray-100: #edece9;
@@ -75,7 +75,7 @@
 
   --color-page: #14120b;
   --color-accent: #edecec;
-  --color-caret: #3ff08a;
+  --color-terminal: #3ff08a;
 
   --color-gray-50: #1b1912;
   --color-gray-100: #211f18;
@@ -121,7 +121,7 @@
 
 /* Block caret that trails the name, as a terminal would leave it. */
 @utility caret {
-  color: var(--color-caret);
+  color: var(--color-terminal);
   animation: caret-blink 1.2s steps(1) infinite;
 }
 
