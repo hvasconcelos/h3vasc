@@ -48,9 +48,13 @@
      rather than a hue. */
   --color-accent: #26251e;
 
-  /* The one chromatic value on the site: phosphor green, used by the block
-     caret and the section labels. */
+  /* Phosphor green, for the blinking block caret. */
   --color-terminal: #0f7d45;
+
+  /* Section labels. Green reads as a terminal on the dark page, but on the
+     light page it turns into a lime highlighter, so light keeps the muted
+     gray-500 it had before. */
+  --color-label: #71716b;
 
   --color-gray-50: #f2f2ef;
   --color-gray-100: #edece9;
@@ -76,6 +80,7 @@
   --color-page: #14120b;
   --color-accent: #edecec;
   --color-terminal: #3ff08a;
+  --color-label: #3ff08a;
 
   --color-gray-50: #1b1912;
   --color-gray-100: #211f18;

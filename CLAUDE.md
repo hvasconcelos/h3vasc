@@ -108,7 +108,12 @@ Light and dark, toggled by `ThemeToggle.astro` in the header.
 
 `--color-accent` marks the shell prompt, prose links and section chevrons. It is a **brightness step, not a hue** — the strongest end of the ramp (`#26251e` light, `#edecec` dark). Bracketed tags deliberately use `text-gray-500` instead, so the 37 of them recede rather than compete with the prompt.
 
-`--color-terminal` (`#0f7d45` light, `#3ff08a` dark) is the **only hue on the site**. It dresses the blinking block caret and the six section labels, and nothing else — the phosphor green works as a terminal signature because it is scarce. Do not extend it to links, tags or body headings. Both values clear 4.5:1 on their page colour (4.84:1 light, 12.53:1 dark), so the labels stay legible as real text.
+Two tokens carry the terminal green, and they are **theme-asymmetric on purpose**:
+
+- `--color-terminal` (`#0f7d45` light, `#3ff08a` dark) — the blinking block caret only.
+- `--color-label` (`#71716b` light, `#3ff08a` dark) — the six section labels. Green works against the dark page but turns into a lime highlighter on the warm light page, so **light deliberately keeps the muted gray**. Do not "fix" this into a single value.
+
+The green is the only hue on the site and it stays scarce; do not extend it to links, tags or body headings. Label contrast holds either way: 4.58:1 light, 12.53:1 dark.
 
 ### Color Palette
 
