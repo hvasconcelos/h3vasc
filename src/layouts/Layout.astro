@@ -1,15 +1,19 @@
 ---
-import '@fontsource-variable/inter'
+// The site is set entirely in JetBrains Mono. Inter is still a dependency but
+// is deliberately not imported, so its files never reach the bundle.
 import '@fontsource-variable/jetbrains-mono'
 import '../styles/global.css'
 
 interface Props {
   title: string
   description: string
+  /** Overrides the default social card. Must be a path under public/. */
+  image?: string
 }
 
-const { title, description } = Astro.props
+const { title, description, image = '/og.png' } = Astro.props
 const canonical = new URL(Astro.url.pathname, Astro.site)
+const socialImage = new URL(image, Astro.site)
 ---
 
 <!doctype html>
@@ -49,16 +53,56 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
       })()
     </script>
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="Hélder Vasconcelos" />
+    <meta property="og:locale" content="en_GB" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={new URL('/avatar.jpg', Astro.site)} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Hélder Vasconcelos — Chief Technology Officer at LayerX"
+    />
+    <meta property="profile:first_name" content="Hélder" />
+    <meta property="profile:last_name" content="Vasconcelos" />
 
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@heldervasc" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL('/avatar.jpg', Astro.site)} />
+    <meta name="twitter:image" content={socialImage} />
+    <meta
+      name="twitter:image:alt"
+      content="Hélder Vasconcelos — Chief Technology Officer at LayerX"
+    />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: 'Hélder Vasconcelos',
+        url: Astro.site?.href,
+        image: socialImage.href,
+        jobTitle: 'Chief Technology Officer',
+        worksFor: { '@type': 'Organization', name: 'LayerX', url: 'https://layerx.xyz' },
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Porto',
+          addressCountry: 'PT',
+        },
+        sameAs: [
+          'https://github.com/hvasconcelos',
+          'https://linkedin.com/in/heldervasc',
+          'https://x.com/heldervasc',
+        ],
+      })}
+    />
   </head>
   <body class="font-sans">
     <slot />
