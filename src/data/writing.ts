@@ -6,14 +6,57 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
-    "title": "Inside BakerFi: Launching a Composable and Secure DeFi Vault Platform",
-    "date": "LayerX Blog, 2025",
-    "url": "https://blog.layerx.xyz/bakerfi-case-study"
+    title: 'Enterprise AI Governance: The Layer Between AI and Your Data',
+    date: 'LayerX Blog, 2026',
+    url: 'https://layerx.xyz/blog/enterprise-ai-governance',
+  },
+  {
+    title: 'How to Control LLM Output: Temperature, Top-P & Beyond',
+    date: 'LayerX Blog, 2026',
+    url: 'https://layerx.xyz/blog/llm-temperature-sampling-guide',
+  },
+  {
+    title: 'Coding with AI Agents: the 20% nobody talks about',
+    date: 'LayerX Blog, 2026',
+    url: 'https://layerx.xyz/blog/ai-coding-agents-lessons',
+  },
+  {
+    title:
+      'Giving our blog a voice: how we turned posts into audio with open models, locally, on a Mac',
+    date: 'LayerX Blog, 2026',
+    url: 'https://layerx.xyz/blog/audio-narration-with-mlx-and-open-source-tts',
+  },
+  {
+    title: 'Fine-Tuning a Small LLM for Customer Support Pt. 1',
+    date: 'LayerX Blog, 2026',
+    url: 'https://layerx.xyz/blog/fine-tuning-small-llm-customer-support',
+  },
+  {
+    title: 'Are We Building the Perfect Finance Infrastructure for Machines?',
+    date: 'LayerX Blog, 2026',
+    url: 'https://layerx.xyz/blog/web3-finance-infrastructure-for-ai-agents',
+  },
+  {
+    title:
+      'Who Watches the Bots? Building Infrastructure for Agentic Trading at scale',
+    date: 'LayerX Blog, 2026',
+    url: 'https://layerx.xyz/blog/deploy-monitor-scale-trading-bots',
+  },
+  {
+    title: 'The Agentic Shift: How AI Transformed LayerX Engineering Workflow',
+    date: 'LayerX Blog, 2025',
+    url: 'https://layerx.xyz/blog/ai-agentic-shift-at-layerx',
+  },
+  {
+    title:
+      'Inside BakerFi: Launching a Composable and Secure DeFi Vault Platform',
+    date: 'LayerX Blog, 2025',
+    url: 'https://layerx.xyz/blog/bakerfi-case-study',
   },
   {
     title: 'How to launch a Secure DeFi Protocol in 120 Days',
     date: 'LayerX Blog, 2025',
-    url: 'https://blog.layerx.xyz/how-to-launch-secure-defi-protocol-in-120-days',
+    url: 'https://layerx.xyz/blog/how-to-launch-secure-defi-protocol-in-120-days',
   },
   {
     title: 'Inside the Garden Token Factory - Reinventing Token Launch Stack',
