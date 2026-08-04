@@ -37,6 +37,7 @@ h3vasc-web/
 │   ├── data/                    # All site content
 │   │   ├── bio.md               # About section (Markdown)
 │   │   ├── experience.ts
+│   │   ├── projects.ts
 │   │   ├── education.ts
 │   │   ├── writing.ts
 │   │   └── social.ts
@@ -56,7 +57,7 @@ Content is separated from markup — you rarely need to touch `.astro` files.
 
 **Bio** — edit `src/data/bio.md`. Standard Markdown; links automatically open in a new tab.
 
-**Experience, education, writing, social links** — edit the matching file in `src/data/`. Each exports a typed array, so a missing or misspelled field is a build error rather than a broken page:
+**Experience, side projects, education, writing, social links** — edit the matching file in `src/data/`. Each exports a typed array, so a missing or misspelled field is a build error rather than a broken page:
 
 ```typescript
 // src/data/writing.ts

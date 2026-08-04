@@ -32,6 +32,7 @@ h3vasc-web/
 │   ├── data/                    # Content lives here, not in markup
 │   │   ├── bio.md
 │   │   ├── experience.ts
+│   │   ├── projects.ts
 │   │   ├── education.ts
 │   │   ├── writing.ts
 │   │   └── social.ts
@@ -62,6 +63,7 @@ There is no lint script. `npm run check` is the closest equivalent and should pa
 
 - **Bio** → `src/data/bio.md`. Plain Markdown. External links get `target="_blank"` automatically (see the `externalLinks` hast plugin in `astro.config.mjs`) — do not hand-write `target` attributes.
 - **Experience** → `src/data/experience.ts` (`Experience[]`)
+- **Side projects** → `src/data/projects.ts` (`Project[]`). Names and descriptions are copied verbatim from GitHub; refresh them with `gh api repos/<owner>/<repo>` rather than paraphrasing. Deliberately no star counts — they would go stale in a static build.
 - **Education** → `src/data/education.ts` (`Education[]`)
 - **Writing** → `src/data/writing.ts` (`BlogPost[]`)
 - **Social links** → `src/data/social.ts` (`SocialLink[]`). The `platform` field selects an SVG in `SocialIcon.astro`; adding a new platform means widening the `SocialPlatform` union and adding a branch there.
@@ -75,7 +77,7 @@ Each page section is a `<CollapsibleSection id title defaultOpen?>` in `index.as
 - One global script in `CollapsibleSection.astro` wires **every** instance by querying `details[data-collapsible]`. Astro `<script>` tags are bundled once and module-scoped, so per-instance logic must go through DOM queries, never per-component state.
 - Closing animates height before flipping `open`; during that window the element carries `.is-closing` so the chevron un-rotates immediately.
 - `prefers-reduced-motion: reduce` skips the animation entirely.
-- Currently **About** starts open (`defaultOpen`); Experience, Education and Writing start collapsed.
+- Currently **About** starts open (`defaultOpen`); Experience, Side Projects, Education and Writing start collapsed.
 
 ## Design Principles
 

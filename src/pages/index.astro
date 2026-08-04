@@ -5,6 +5,7 @@ import SocialIcon from '../components/SocialIcon.astro'
 import { Content as Bio } from '../data/bio.md'
 import { educationData } from '../data/education'
 import { experienceData } from '../data/experience'
+import { projects } from '../data/projects'
 import { socialLinks } from '../data/social'
 import { blogPosts } from '../data/writing'
 
@@ -42,37 +43,36 @@ const year = new Date().getFullYear()
       </div>
     </CollapsibleSection>
 
-    {/* Experience Section */}
-    <CollapsibleSection id="experience" title="Experience">
-      <div class="space-y-8">
+    {/* Side Projects Section */}
+    <CollapsibleSection id="projects" title="Side Projects">
+      <ul class="space-y-6">
         {
-          experienceData.map((exp) => (
-            <div class="border-l-2 border-gray-200 pl-4 transition-colors hover:border-gray-400">
-              <h3 class="font-medium text-gray-900">{exp.company}</h3>
-              <p class="text-sm text-gray-700">{exp.role}</p>
-              <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span class="font-mono text-xs text-gray-500">
-                  {exp.period}
-                </span>
-                <span class="text-gray-300">·</span>
-              </div>
-              <p class="mt-1 text-xs text-gray-500">{exp.location}</p>
-              <p class="mt-2 text-sm leading-relaxed text-gray-600">
-                {exp.description}
-              </p>
-              {exp.technologies && exp.technologies.length > 0 && (
-                <div class="mt-3 flex flex-wrap gap-2">
-                  {exp.technologies.map((tech) => (
+          projects.map((project) => (
+            <li>
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group block transition-transform hover:translate-x-1"
+              >
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <h3 class="font-medium text-gray-900 transition-colors group-hover:text-gray-600">
+                    {project.name}
+                  </h3>
+                  {project.language && (
                     <span class="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-600">
-                      {tech}
+                      {project.language}
                     </span>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
+                <p class="mt-1 text-sm leading-relaxed text-gray-600">
+                  {project.description}
+                </p>
+              </a>
+            </li>
           ))
         }
-      </div>
+      </ul>
     </CollapsibleSection>
 
     {/* Education Section */}
@@ -113,6 +113,39 @@ const year = new Date().getFullYear()
           ))
         }
       </ul>
+    </CollapsibleSection>
+
+    {/* Experience Section */}
+    <CollapsibleSection id="experience" title="Experience">
+      <div class="space-y-8">
+        {
+          experienceData.map((exp) => (
+            <div class="border-l-2 border-gray-200 pl-4 transition-colors hover:border-gray-400">
+              <h3 class="font-medium text-gray-900">{exp.company}</h3>
+              <p class="text-sm text-gray-700">{exp.role}</p>
+              <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span class="font-mono text-xs text-gray-500">
+                  {exp.period}
+                </span>
+                <span class="text-gray-300">·</span>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">{exp.location}</p>
+              <p class="mt-2 text-sm leading-relaxed text-gray-600">
+                {exp.description}
+              </p>
+              {exp.technologies && exp.technologies.length > 0 && (
+                <div class="mt-3 flex flex-wrap gap-2">
+                  {exp.technologies.map((tech) => (
+                    <span class="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-600">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))
+        }
+      </div>
     </CollapsibleSection>
 
     {/* Footer */}
