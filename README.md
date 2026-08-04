@@ -33,6 +33,7 @@ h3vasc-web/
 │   ├── components/
 │   │   ├── CollapsibleSection.astro
 │   │   ├── SocialIcon.astro
+│   │   ├── ThemeToggle.astro
 │   │   └── GlitteryBackground.astro   # animated canvas, currently unused
 │   ├── data/                    # All site content
 │   │   ├── bio.md               # About section (Markdown)
@@ -77,6 +78,12 @@ export const blogPosts: BlogPost[] = [
 ```
 
 They are built on native `<details>`/`<summary>`, so they still expand with JavaScript disabled; the height animation is the only part that needs JS, and it is skipped under `prefers-reduced-motion`.
+
+## Theming
+
+The site ships light and dark themes, switched by the button in the header. Until you click it the site follows your OS setting; after that your choice is remembered in `localStorage`. An inline script in `<head>` applies the theme before the first paint, so there is no flash of the wrong colours.
+
+The dark theme is the grayscale palette reversed — `:root[data-theme='dark']` in `src/styles/global.css` reassigns `--color-gray-50` … `--color-gray-900`. Adding a component needs no dark-mode work as long as it uses the `gray-*` scale.
 
 ## Docker
 

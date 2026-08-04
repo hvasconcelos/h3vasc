@@ -27,6 +27,28 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
+    {/*
+      Runs before first paint so the page never flashes the wrong theme.
+      Must stay inline and unbundled — a deferred script would paint first.
+    */}
+    <script is:inline>
+      ;(function () {
+        var stored = localStorage.getItem('theme')
+        var system = window.matchMedia('(prefers-color-scheme: dark)')
+        document.documentElement.dataset.theme =
+          stored || (system.matches ? 'dark' : 'light')
+
+        // Follow the OS until the visitor picks a theme explicitly.
+        system.addEventListener('change', function (event) {
+          if (!localStorage.getItem('theme')) {
+            document.documentElement.dataset.theme = event.matches
+              ? 'dark'
+              : 'light'
+          }
+        })
+      })()
+    </script>
+
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

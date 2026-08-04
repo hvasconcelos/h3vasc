@@ -2,9 +2,11 @@
 import Layout from '../layouts/Layout.astro'
 import CollapsibleSection from '../components/CollapsibleSection.astro'
 import SocialIcon from '../components/SocialIcon.astro'
+import ThemeToggle from '../components/ThemeToggle.astro'
 import { Content as Bio } from '../data/bio.md'
 import { educationData } from '../data/education'
 import { experienceData } from '../data/experience'
+import { musicProjects } from '../data/music'
 import { projects } from '../data/projects'
 import { socialLinks } from '../data/social'
 import { blogPosts } from '../data/writing'
@@ -13,31 +15,34 @@ const year = new Date().getFullYear()
 ---
 
 <Layout
-  title="Helder Vasconcelos"
+  title="Hélder Vasconcelos"
   description="CTO at LayerX. Coder by day, Hacker by night."
 >
   <main class="mx-auto min-h-screen max-w-2xl px-6 py-24">
     {/* Header/Name */}
-    <header class="mb-12 flex items-center gap-5">
-      <img
-        src="/avatar.jpg"
-        alt="Helder Vasconcelos"
-        width="96"
-        height="96"
-        class="h-20 w-20 shrink-0 rounded-full object-cover grayscale sm:h-24 sm:w-24"
-      />
-      <div>
-        <h1 class="mb-2 text-4xl font-light tracking-tight text-gray-900">
-          Helder Vasconcelos
-        </h1>
-        <p class="font-mono text-sm text-gray-500">Porto, Portugal 🇵🇹</p>
+    <header class="mb-12 flex items-start justify-between gap-4">
+      <div class="flex items-center gap-5">
+        <img
+          src="/avatar.jpg"
+          alt="Hélder Vasconcelos"
+          width="96"
+          height="96"
+          class="h-20 w-20 shrink-0 rounded-full object-cover grayscale transition-[filter] duration-500 hover:grayscale-0 sm:h-24 sm:w-24"
+        />
+        <div>
+          <h1 class="mb-2 text-4xl font-light tracking-tight text-gray-900">
+            Hélder Vasconcelos
+          </h1>
+          <p class="font-mono text-sm text-gray-500">Porto, Portugal 🇵🇹</p>
+        </div>
       </div>
+      <ThemeToggle />
     </header>
 
     {/* Bio Section */}
     <CollapsibleSection id="about" title="About" defaultOpen>
       <div
-        class="leading-relaxed text-gray-700 [&_a]:border-b [&_a]:border-gray-300 [&_a]:text-gray-900 [&_a]:transition-colors [&_a:hover]:border-gray-600 [&_a:hover]:text-gray-600 [&_em]:italic [&_p]:mb-4 [&_p:last-child]:mb-0"
+        class="leading-relaxed text-justify hyphens-auto text-gray-700 [&_a]:border-b [&_a]:border-gray-300 [&_a]:text-gray-900 [&_a]:transition-colors [&_a:hover]:border-gray-600 [&_a:hover]:text-gray-600 [&_em]:italic [&_p]:mb-4 [&_p:last-child]:mb-0"
       >
         <Bio />
       </div>
@@ -115,6 +120,50 @@ const year = new Date().getFullYear()
       </ul>
     </CollapsibleSection>
 
+    {/* Music Section */}
+    <CollapsibleSection id="music" title="Music">
+      <div class="space-y-10">
+        {
+          musicProjects.map((project) => (
+            <div>
+              <h3 class="font-mono text-sm text-gray-900">
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="border-b border-gray-300 transition-colors hover:border-gray-600 hover:text-gray-600"
+                >
+                  {project.name}
+                </a>
+              </h3>
+              <p class="mt-2 mb-6 text-sm leading-relaxed text-gray-600">
+                {project.description}
+              </p>
+              <ul class="space-y-6">
+                {project.releases.map((release) => (
+                  <li>
+                    <a
+                      href={release.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="group block transition-transform hover:translate-x-1"
+                    >
+                      <h4 class="mb-1 font-medium text-gray-900 transition-colors group-hover:text-gray-600">
+                        💿 {release.title}
+                      </h4>
+                      <p class="font-mono text-xs text-gray-500">
+                        {release.label}, {release.year} · {release.format}
+                      </p>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </CollapsibleSection>
+
     {/* Experience Section */}
     <CollapsibleSection id="experience" title="Experience">
       <div class="space-y-8">
@@ -152,7 +201,7 @@ const year = new Date().getFullYear()
     <footer class="pt-12">
       <div class="flex items-center justify-between">
         <p class="font-mono text-xs text-gray-400">
-          © {year} Helder Vasconcelos
+          © {year} Hélder Vasconcelos
         </p>
         <div class="flex items-center gap-4">
           {

@@ -1,10 +1,16 @@
 @import 'tailwindcss';
 
+/* Enables `dark:` utilities, driven by the data-theme attribute the inline
+   script in Layout.astro stamps on <html> before first paint. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 /* Tailwind v4 is configured in CSS. This block replaces the old
    tailwind.config.ts: the grayscale palette and the two site fonts. */
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+  --color-page: #ffffff;
 
   --color-gray-50: #fafafa;
   --color-gray-100: #f5f5f5;
@@ -18,6 +24,31 @@
   --color-gray-900: #171717;
 }
 
+/*
+ * The dark theme is the same palette read backwards. Every utility resolves
+ * through var(--color-gray-*), so reversing the scale here themes the whole
+ * site: text-gray-900 becomes near-white, border-gray-200 becomes a dark
+ * hairline, and bg-gray-100 chips darken — with no `dark:` classes in the
+ * markup. This works because the design only ever uses the scale
+ * directionally (dark text on a light page).
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-page: #0a0a0a;
+
+  --color-gray-50: #171717;
+  --color-gray-100: #262626;
+  --color-gray-200: #404040;
+  --color-gray-300: #525252;
+  --color-gray-400: #737373;
+  --color-gray-500: #a3a3a3;
+  --color-gray-600: #d4d4d4;
+  --color-gray-700: #e5e5e5;
+  --color-gray-800: #f5f5f5;
+  --color-gray-900: #fafafa;
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
@@ -25,9 +56,18 @@
   }
 
   body {
-    background-color: var(--color-white);
+    background-color: var(--color-page);
     color: var(--color-gray-900);
     font-family: var(--font-sans);
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body {
+      transition: none;
+    }
   }
 }
 

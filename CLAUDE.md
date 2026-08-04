@@ -28,6 +28,7 @@ h3vasc-web/
 │   ├── components/
 │   │   ├── CollapsibleSection.astro
 │   │   ├── SocialIcon.astro
+│   │   ├── ThemeToggle.astro
 │   │   └── GlitteryBackground.astro
 │   ├── data/                    # Content lives here, not in markup
 │   │   ├── bio.md
@@ -85,6 +86,16 @@ Each page section is a `<CollapsibleSection id title defaultOpen?>` in `index.as
 - **Typography**: Inter for body, JetBrains Mono for metadata and labels
 - **Responsive**: content column capped at `max-w-2xl`
 - **Accessibility**: `aria-label` on icon links, decorative glyphs marked `aria-hidden`
+
+## Theming
+
+Light and dark, toggled by `ThemeToggle.astro` in the header.
+
+- The active theme is a `data-theme="light" | "dark"` attribute on `<html>`.
+- An **inline** `is:inline` script in `Layout.astro` sets it before first paint, reading `localStorage.theme` and falling back to `prefers-color-scheme`. It must stay inline and unbundled — a deferred script paints the wrong theme first.
+- No stored preference means the site follows the OS live. Clicking the toggle writes to `localStorage` and pins the choice from then on.
+- **The dark theme is the light palette read backwards.** `:root[data-theme='dark']` in `global.css` reassigns `--color-gray-50` through `--color-gray-900` to the reversed scale, plus `--color-page`. Every Tailwind utility resolves through `var(--color-gray-*)`, so this themes the entire site with no `dark:` classes in the markup. It works only because the design uses the scale directionally (dark text on a light page) — **keep it that way**: a new component should reach for `text-gray-900` for primary text and `text-gray-400` for muted, never a hardcoded hex or an off-scale color.
+- A `dark:` variant is available (`@custom-variant` in `global.css`) for the rare case that needs it — currently only the toggle's own sun/moon icon swap.
 
 ### Color Palette
 
