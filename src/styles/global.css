@@ -16,22 +16,48 @@
   --font-sans: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
 
-  --color-page: #ffffff;
+  /*
+   * Type scale, stepped down roughly 10% from Tailwind's defaults. JetBrains
+   * Mono has a large x-height and sets wider than a sans at the same nominal
+   * size, so the defaults read heavy here. Overriding the scale rather than
+   * the individual classes keeps rem-based spacing and the column width
+   * unchanged — this shrinks text only.
+   */
+  --text-xs: 0.6875rem; /* 11px */
+  --text-xs--line-height: calc(1 / 0.6875);
+  --text-sm: 0.8125rem; /* 13px */
+  --text-sm--line-height: calc(1.25 / 0.8125);
+  --text-base: 0.9375rem; /* 15px */
+  --text-base--line-height: calc(1.5 / 0.9375);
+  --text-3xl: 1.625rem; /* 26px */
+  --text-3xl--line-height: calc(2 / 1.625);
+  --text-4xl: 2rem; /* 32px */
+  --text-4xl--line-height: calc(2.25 / 2);
+
+  /*
+   * Warm neutral ramp taken from Cursor: page and foreground are their
+   * --color-theme-bg / --color-theme-fg, and the steps between are their own
+   * alpha ladder composited over the page, so the olive cast is preserved all
+   * the way down. Alphas at 400-700 are raised from Cursor's values so every
+   * step carrying real text clears 4.5:1; gray-400 stays decorative (3.24:1)
+   * and is only used for the footer and the toggle border.
+   */
+  --color-page: #f7f7f4;
 
   /* Terminal highlight: prompts, links, the caret, section chevrons. It is a
-     brightness step, not a hue — the site stays entirely grayscale. */
-  --color-accent: #171717;
+     brightness step, not a hue — the site carries no chromatic accent. */
+  --color-accent: #26251e;
 
-  --color-gray-50: #fafafa;
-  --color-gray-100: #f5f5f5;
-  --color-gray-200: #e5e5e5;
-  --color-gray-300: #d4d4d4;
-  --color-gray-400: #a3a3a3;
-  --color-gray-500: #737373;
-  --color-gray-600: #525252;
-  --color-gray-700: #404040;
-  --color-gray-800: #262626;
-  --color-gray-900: #171717;
+  --color-gray-50: #f2f2ef;
+  --color-gray-100: #edece9;
+  --color-gray-200: #e2e2df;
+  --color-gray-300: #c9c9c5;
+  --color-gray-400: #8a8a85;
+  --color-gray-500: #71716b;
+  --color-gray-600: #61605a;
+  --color-gray-700: #474740;
+  --color-gray-800: #35342d;
+  --color-gray-900: #26251e;
 }
 
 /*
@@ -43,19 +69,19 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --color-page: #08090a;
-  --color-accent: #fafafa;
+  --color-page: #14120b;
+  --color-accent: #edecec;
 
-  --color-gray-50: #171717;
-  --color-gray-100: #262626;
-  --color-gray-200: #333333;
-  --color-gray-300: #525252;
-  --color-gray-400: #737373;
-  --color-gray-500: #a3a3a3;
-  --color-gray-600: #d4d4d4;
-  --color-gray-700: #e5e5e5;
-  --color-gray-800: #f5f5f5;
-  --color-gray-900: #fafafa;
+  --color-gray-50: #1b1912;
+  --color-gray-100: #211f18;
+  --color-gray-200: #2e2c26;
+  --color-gray-300: #4c4b46;
+  --color-gray-400: #807f7c;
+  --color-gray-500: #969592;
+  --color-gray-600: #acaba8;
+  --color-gray-700: #c6c5c3;
+  --color-gray-800: #dedddc;
+  --color-gray-900: #edecec;
 }
 
 @layer base {
@@ -68,6 +94,10 @@
     background-color: var(--color-page);
     color: var(--color-gray-900);
     font-family: var(--font-sans);
+    /* Prose with no explicit text-* class (the bio) would otherwise inherit
+       the browser's 16px and sit outside the scale above. */
+    font-size: 0.9375rem;
+    line-height: 1.6;
     transition:
       background-color 0.3s ease,
       color 0.3s ease;

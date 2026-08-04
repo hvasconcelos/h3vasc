@@ -17,7 +17,8 @@ const socialImage = new URL(image, Astro.site)
 ---
 
 <!doctype html>
-<html lang="en">
+<!-- Dark is the served default, so it holds even with JavaScript disabled. -->
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -37,19 +38,12 @@ const socialImage = new URL(image, Astro.site)
     */}
     <script is:inline>
       ;(function () {
+        // Dark is the default: the OS preference is deliberately not consulted,
+        // so a visitor on a light system still lands on the dark theme. Only an
+        // explicit choice from the toggle overrides it.
         var stored = localStorage.getItem('theme')
-        var system = window.matchMedia('(prefers-color-scheme: dark)')
         document.documentElement.dataset.theme =
-          stored || (system.matches ? 'dark' : 'light')
-
-        // Follow the OS until the visitor picks a theme explicitly.
-        system.addEventListener('change', function (event) {
-          if (!localStorage.getItem('theme')) {
-            document.documentElement.dataset.theme = event.matches
-              ? 'dark'
-              : 'light'
-          }
-        })
+          stored === 'light' ? 'light' : 'dark'
       })()
     </script>
 

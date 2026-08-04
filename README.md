@@ -86,9 +86,9 @@ Links to the site unfurl with `public/og.png`, a 1200×630 card. It is generated
 
 ## Theming
 
-The site ships light and dark themes, switched by the button in the header. Until you click it the site follows your OS setting; after that your choice is remembered in `localStorage`. An inline script in `<head>` applies the theme before the first paint, so there is no flash of the wrong colours.
+The site ships light and dark themes, switched by the button in the header. **Dark is the default** — it is set on `<html>` in the served markup, so it holds even without JavaScript, and your OS setting is not consulted. Choosing light from the toggle is remembered in `localStorage`.
 
-The dark theme is the grayscale palette reversed — `:root[data-theme='dark']` in `src/styles/global.css` reassigns `--color-gray-50` … `--color-gray-900`. Adding a component needs no dark-mode work as long as it uses the `gray-*` scale.
+Both themes use a warm neutral ramp derived from Cursor's palette. `:root[data-theme='dark']` in `src/styles/global.css` reassigns `--color-gray-50` … `--color-gray-900`, so adding a component needs no dark-mode work as long as it uses the `gray-*` scale.
 
 ## Docker
 

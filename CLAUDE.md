@@ -98,27 +98,32 @@ Each page section is a `<CollapsibleSection id title defaultOpen?>` in `index.as
 Light and dark, toggled by `ThemeToggle.astro` in the header.
 
 - The active theme is a `data-theme="light" | "dark"` attribute on `<html>`.
-- An **inline** `is:inline` script in `Layout.astro` sets it before first paint, reading `localStorage.theme` and falling back to `prefers-color-scheme`. It must stay inline and unbundled — a deferred script paints the wrong theme first.
-- No stored preference means the site follows the OS live. Clicking the toggle writes to `localStorage` and pins the choice from then on.
+- **Dark is the default.** `<html>` ships with `data-theme="dark"` already set, so dark holds even with JavaScript disabled. The OS `prefers-color-scheme` is deliberately **not** consulted — a visitor on a light system still lands on dark.
+- An **inline** `is:inline` script in `Layout.astro` flips it to light only when `localStorage.theme === 'light'`. It must stay inline and unbundled — a deferred script paints the wrong theme first.
+- Clicking the toggle writes to `localStorage` and pins the choice from then on.
 - **The dark theme is the light palette read backwards.** `:root[data-theme='dark']` in `global.css` reassigns `--color-gray-50` through `--color-gray-900` to the reversed scale, plus `--color-page`. Every Tailwind utility resolves through `var(--color-gray-*)`, so this themes the entire site with no `dark:` classes in the markup. It works only because the design uses the scale directionally (dark text on a light page) — **keep it that way**: a new component should reach for `text-gray-900` for primary text and `text-gray-400` for muted, never a hardcoded hex or an off-scale color.
 - A `dark:` variant is available (`@custom-variant` in `global.css`) for the rare case that needs it — currently only the toggle's own sun/moon icon swap.
 
 ### Accent
 
-`--color-accent` marks the shell prompt, prose links and the caret. It is a **brightness step, not a hue** — the strongest end of the gray ramp (`#171717` light, `#fafafa` dark). The site is entirely grayscale; do not introduce a colour here. Bracketed tags deliberately use `text-gray-500` instead, so the 37 of them recede rather than compete with the prompt.
+`--color-accent` marks the shell prompt, prose links and the caret. It is a **brightness step, not a hue** — the strongest end of the ramp (`#26251e` light, `#edecec` dark). The site is entirely grayscale; do not introduce a colour here. Bracketed tags deliberately use `text-gray-500` instead, so the 37 of them recede rather than compete with the prompt.
 
 ### Color Palette
 
-Defined in `src/styles/global.css` under `@theme` (Tailwind 4 is configured in CSS — there is no `tailwind.config.ts`):
+Defined in `src/styles/global.css` under `@theme` (Tailwind 4 is configured in CSS — there is no `tailwind.config.ts`).
 
-- Background: White (#ffffff)
-- Primary text: Gray-900 (#171717)
-- Secondary text: Gray-700 (#404040)
-- Metadata: Gray-500 (#737373)
-- Accents: Gray-400 (#a3a3a3)
-- Borders: Gray-200 (#e5e5e5)
+The ramp is **Cursor's**, not Tailwind's neutrals: page and foreground are Cursor's `--color-theme-bg` / `--color-theme-fg` (`#f7f7f4` / `#26251e` light, `#14120b` / `#edecec` dark), and the steps between are Cursor's own alpha ladder composited over the page, which keeps the warm olive cast through the whole scale. It is a warm neutral — **not** a true gray — so never mix in a Tailwind default gray or a hardcoded `#ccc`; it will read as a cold patch.
 
-The `gray` scale is overridden to Tailwind's `neutral` values; use `gray-*` utilities and nothing else.
+Alphas at steps 400–700 are raised above Cursor's own so every step carrying real text clears 4.5:1. `gray-400` is the exception at 3.24:1 on light and is reserved for decoration (footer line, toggle border) — do not put body text on it.
+
+- Page: `--color-page`
+- Primary text: `gray-900`
+- Body text: `gray-700`
+- Descriptions: `gray-600`
+- Metadata and section labels: `gray-500`
+- Borders: `gray-200`
+
+Use `gray-*` utilities and nothing else.
 
 ## Deployment
 
