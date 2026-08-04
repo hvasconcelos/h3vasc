@@ -1,27 +1,33 @@
-'use client'
+---
+/**
+ * Animated grayscale particle-wave canvas.
+ *
+ * Ported from the React version; not currently used by any page. Drop
+ * <GlitteryBackground /> inside a `relative` container to enable it.
+ */
+---
 
-import { useEffect, useRef } from 'react'
+<canvas data-glittery-background class="absolute inset-0 h-full w-full"></canvas>
 
-interface Particle {
-  x: number
-  y: number
-  baseX: number
-  baseY: number
-  size: number
-  opacity: number
-  index: number
-}
+<script>
+  interface Particle {
+    x: number
+    y: number
+    baseX: number
+    baseY: number
+    size: number
+    opacity: number
+    index: number
+  }
 
-export function GlitteryBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  type Rgb = [number, number, number]
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+  const canvas = document.querySelector<HTMLCanvasElement>(
+    'canvas[data-glittery-background]'
+  )
+  const ctx = canvas?.getContext('2d')
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
+  if (canvas && ctx) {
     // Set canvas size to window size
     const resizeCanvas = () => {
       canvas.width = window.innerWidth
@@ -31,12 +37,8 @@ export function GlitteryBackground() {
     window.addEventListener('resize', resizeCanvas)
 
     // Helper function to interpolate between colors
-    const interpolateColor = (
-      color1: [number, number, number],
-      color2: [number, number, number],
-      factor: number
-    ) => {
-      const result = color1.slice()
+    const interpolateColor = (color1: Rgb, color2: Rgb, factor: number) => {
+      const result = color1.slice() as Rgb
       for (let i = 0; i < 3; i++) {
         result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]))
       }
@@ -46,26 +48,22 @@ export function GlitteryBackground() {
     // Get color based on wave phase (0 to 1) - using grayscale tones
     const getWaveColor = (phase: number) => {
       // Define grayscale stops: light gray -> dark gray -> medium gray -> light gray
-      const lightGray: [number, number, number] = [200, 200, 200] // #c8c8c8
-      const darkGray: [number, number, number] = [64, 64, 64] // #404040
-      const mediumGray: [number, number, number] = [115, 115, 115] // #737373
+      const lightGray: Rgb = [200, 200, 200] // #c8c8c8
+      const darkGray: Rgb = [64, 64, 64] // #404040
+      const mediumGray: Rgb = [115, 115, 115] // #737373
 
       // Normalize phase to 0-1
       phase = phase % 1
 
       if (phase < 0.33) {
         // light gray to dark gray transition
-        const factor = phase / 0.33
-        return interpolateColor(lightGray, darkGray, factor)
+        return interpolateColor(lightGray, darkGray, phase / 0.33)
       } else if (phase < 0.66) {
         // dark gray to medium gray transition
-        const factor = (phase - 0.33) / 0.33
-        return interpolateColor(darkGray, mediumGray, factor)
-      } else {
-        // medium gray back to light gray transition
-        const factor = (phase - 0.66) / 0.34
-        return interpolateColor(mediumGray, lightGray, factor)
+        return interpolateColor(darkGray, mediumGray, (phase - 0.33) / 0.33)
       }
+      // medium gray back to light gray transition
+      return interpolateColor(mediumGray, lightGray, (phase - 0.66) / 0.34)
     }
 
     // Create grid of particles
@@ -82,8 +80,8 @@ export function GlitteryBackground() {
       const y = (canvas.height / rows) * row + canvas.height / rows / 2
 
       particles.push({
-        x: x,
-        y: y,
+        x,
+        y,
         baseX: x,
         baseY: y,
         size: 1.5, // scaled down to 0.5x (from 3px to 1.5px)
@@ -174,18 +172,15 @@ export function GlitteryBackground() {
 
     animate()
 
-    // Cleanup
-    return () => {
+    window.addEventListener('beforeunload', () => {
       window.removeEventListener('resize', resizeCanvas)
       cancelAnimationFrame(animationFrameId)
-    }
-  }, [])
+    })
+  }
+</script>
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full"
-      style={{ opacity: 0.4 }}
-    />
-  )
-}
+<style>
+  canvas {
+    opacity: 0.4;
+  }
+</style>

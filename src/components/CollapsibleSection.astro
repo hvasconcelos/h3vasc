@@ -1,0 +1,114 @@
+---
+interface Props {
+  id: string
+  title: string
+  defaultOpen?: boolean
+}
+
+const { id, title, defaultOpen = false } = Astro.props
+---
+
+<details
+  id={id}
+  data-collapsible
+  open={defaultOpen}
+  class="border-b border-gray-200 last:border-b-0"
+>
+  <summary
+    class="group flex cursor-pointer list-none items-center gap-2 py-3"
+  >
+    <span
+      aria-hidden="true"
+      class="chevron inline-block w-3 shrink-0 font-mono text-xs text-gray-400 transition-transform duration-200 group-hover:text-gray-900"
+    >
+      &gt;
+    </span>
+    <h2
+      class="text-xs uppercase tracking-wider text-gray-400 transition-colors group-hover:text-gray-900"
+    >
+      {title}
+    </h2>
+  </summary>
+  <div data-collapsible-content>
+    <div class="pt-3 pb-10">
+      <slot />
+    </div>
+  </div>
+</details>
+
+<style>
+  /* Hide the native disclosure triangle; the chevron span replaces it. */
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::marker {
+    content: '';
+  }
+
+  details[open] > summary .chevron {
+    transform: rotate(90deg);
+  }
+
+  /* While the close animation runs the element is still [open], so the
+     chevron is un-rotated eagerly to keep it in step with the click. */
+  details.is-closing > summary .chevron {
+    transform: none;
+  }
+</style>
+
+<script>
+  const DURATION = 220
+  const EASING = 'cubic-bezier(0.4, 0, 0.2, 1)'
+
+  const sections =
+    document.querySelectorAll<HTMLDetailsElement>('details[data-collapsible]')
+
+  sections.forEach((details) => {
+    const summary = details.querySelector('summary')
+    const content = details.querySelector<HTMLElement>(
+      '[data-collapsible-content]'
+    )
+    if (!summary || !content) return
+
+    let animation: Animation | null = null
+
+    const animate = (from: number, to: number, onDone: () => void) => {
+      content.style.overflow = 'hidden'
+      animation = content.animate(
+        { height: [`${from}px`, `${to}px`], opacity: [from ? 1 : 0, to ? 1 : 0] },
+        { duration: DURATION, easing: EASING }
+      )
+      animation.onfinish = () => {
+        content.style.overflow = ''
+        animation = null
+        onDone()
+      }
+      animation.oncancel = () => {
+        content.style.overflow = ''
+      }
+    }
+
+    summary.addEventListener('click', (event) => {
+      // Take over the native toggle so the height change can be animated.
+      event.preventDefault()
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        details.open = !details.open
+        return
+      }
+
+      animation?.cancel()
+
+      if (details.open) {
+        details.classList.add('is-closing')
+        animate(content.offsetHeight, 0, () => {
+          details.open = false
+          details.classList.remove('is-closing')
+        })
+      } else {
+        details.open = true
+        animate(0, content.offsetHeight, () => {})
+      }
+    })
+  })
+</script>
