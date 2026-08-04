@@ -16,22 +16,36 @@ const year = new Date().getFullYear()
 
 <Layout
   title="Hélder Vasconcelos"
-  description="CTO at LayerX. Coder by day, Hacker by night."
+  description="CTO at LayerX, in Porto. Agentic workflows, LLM inference and high performance systems."
 >
   <main class="mx-auto min-h-screen max-w-2xl px-6 py-24">
     {/* Header/Name */}
     <header class="mb-12 flex items-start justify-between gap-4">
       <div class="flex items-center gap-5">
-        <img
-          src="/avatar.jpg"
-          alt="Hélder Vasconcelos"
-          width="96"
-          height="96"
-          class="h-20 w-20 shrink-0 rounded-full object-cover grayscale transition-[filter] duration-500 hover:grayscale-0 sm:h-24 sm:w-24"
-        />
+        {/* Fixed-size circle; the photo scales inside it and is clipped. */}
+        <div
+          class="group h-20 w-20 shrink-0 overflow-hidden rounded-full sm:h-24 sm:w-24"
+        >
+          <img
+            src="/avatar.jpg"
+            alt="Hélder Vasconcelos"
+            width="96"
+            height="96"
+            class="h-full w-full object-cover grayscale transition-[filter,transform] duration-500 group-hover:scale-110 group-hover:grayscale-0"
+          />
+        </div>
         <div>
-          <h1 class="mb-2 text-4xl font-light tracking-tight text-gray-900">
-            Hélder Vasconcelos
+          <p class="mb-1 font-mono text-xs text-gray-500">
+            <span class="text-accent">helder@h3vasc</span>:<span
+              class="text-gray-400">~</span
+            >$ whoami
+          </p>
+          <h1
+            class="mb-2 text-3xl font-medium tracking-tight text-gray-900 sm:text-4xl"
+          >
+            Hélder Vasconcelos<span class="caret ml-1" aria-hidden="true"
+              >▋</span
+            >
           </h1>
           <p class="font-mono text-sm text-gray-500">Porto, Portugal 🇵🇹</p>
         </div>
@@ -42,7 +56,7 @@ const year = new Date().getFullYear()
     {/* Bio Section */}
     <CollapsibleSection id="about" title="About" defaultOpen>
       <div
-        class="leading-relaxed text-justify hyphens-auto text-gray-700 [&_a]:border-b [&_a]:border-gray-300 [&_a]:text-gray-900 [&_a]:transition-colors [&_a:hover]:border-gray-600 [&_a:hover]:text-gray-600 [&_em]:italic [&_p]:mb-4 [&_p:last-child]:mb-0"
+        class="leading-relaxed text-justify hyphens-auto text-gray-700 [&_a]:text-accent [&_a]:border-b [&_a]:border-gray-300 [&_a]:transition-colors [&_a:hover]:border-accent [&_a:hover]:opacity-70 [&_em]:italic [&_p]:mb-4 [&_p:last-child]:mb-0"
       >
         <Bio />
       </div>
@@ -58,16 +72,14 @@ const year = new Date().getFullYear()
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group block transition-transform hover:translate-x-1"
+                class="group block"
               >
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <h3 class="font-medium text-gray-900 transition-colors group-hover:text-gray-600">
                     {project.name}
                   </h3>
                   {project.language && (
-                    <span class="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-600">
-                      {project.language}
-                    </span>
+                    <span class="font-mono text-xs text-gray-500">[{project.language}]</span>
                   )}
                 </div>
                 <p class="mt-1 text-sm leading-relaxed text-gray-600">
@@ -80,25 +92,6 @@ const year = new Date().getFullYear()
       </ul>
     </CollapsibleSection>
 
-    {/* Education Section */}
-    <CollapsibleSection id="education" title="Education">
-      <div class="space-y-8">
-        {
-          educationData.map((edu) => (
-            <div class="border-l-2 border-gray-200 pl-4 transition-colors hover:border-gray-400">
-              <h3 class="font-medium text-gray-900">{edu.institution}</h3>
-              <p class="text-sm text-gray-700">{edu.degree}</p>
-              <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span class="font-mono text-xs text-gray-500">
-                  {edu.period}
-                </span>
-              </div>
-            </div>
-          ))
-        }
-      </div>
-    </CollapsibleSection>
-
     {/* Blog Posts Section */}
     <CollapsibleSection id="writing" title="Writing">
       <ul class="space-y-6">
@@ -107,10 +100,10 @@ const year = new Date().getFullYear()
             <li>
               <a
                 href={post.url}
-                class="group block transition-transform hover:translate-x-1"
+                class="group block"
               >
                 <h3 class="mb-1 text-gray-900 transition-colors group-hover:text-gray-600">
-                  📖 {post.title}
+                  {post.title}
                 </h3>
                 <time class="font-mono text-xs text-gray-500">{post.date}</time>
               </a>
@@ -131,7 +124,7 @@ const year = new Date().getFullYear()
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="border-b border-gray-300 transition-colors hover:border-gray-600 hover:text-gray-600"
+                  class="text-accent border-b border-gray-300 transition-colors hover:border-accent hover:opacity-70"
                 >
                   {project.name}
                 </a>
@@ -146,10 +139,10 @@ const year = new Date().getFullYear()
                       href={release.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="group block transition-transform hover:translate-x-1"
+                      class="group block"
                     >
                       <h4 class="mb-1 font-medium text-gray-900 transition-colors group-hover:text-gray-600">
-                        💿 {release.title}
+                        {release.title}
                       </h4>
                       <p class="font-mono text-xs text-gray-500">
                         {release.label}, {release.year} · {release.format}
@@ -185,12 +178,29 @@ const year = new Date().getFullYear()
               {exp.technologies && exp.technologies.length > 0 && (
                 <div class="mt-3 flex flex-wrap gap-2">
                   {exp.technologies.map((tech) => (
-                    <span class="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-600">
-                      {tech}
-                    </span>
+                    <span class="font-mono text-xs text-gray-500">[{tech}]</span>
                   ))}
                 </div>
               )}
+            </div>
+          ))
+        }
+      </div>
+    </CollapsibleSection>
+
+    {/* Education Section */}
+    <CollapsibleSection id="education" title="Education">
+      <div class="space-y-8">
+        {
+          educationData.map((edu) => (
+            <div class="border-l-2 border-gray-200 pl-4 transition-colors hover:border-gray-400">
+              <h3 class="font-medium text-gray-900">{edu.institution}</h3>
+              <p class="text-sm text-gray-700">{edu.degree}</p>
+              <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span class="font-mono text-xs text-gray-500">
+                  {edu.period}
+                </span>
+              </div>
             </div>
           ))
         }

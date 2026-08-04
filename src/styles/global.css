@@ -4,13 +4,23 @@
    script in Layout.astro stamps on <html> before first paint. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
-/* Tailwind v4 is configured in CSS. This block replaces the old
-   tailwind.config.ts: the grayscale palette and the two site fonts. */
+/*
+ * Tailwind v4 is configured in CSS. This block replaces the old
+ * tailwind.config.ts.
+ *
+ * The site is set entirely in JetBrains Mono — `font-sans` and `font-mono`
+ * deliberately resolve to the same stack, so existing `font-mono` utilities
+ * still read as intent (metadata, labels) without changing the rendering.
+ */
 @theme {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
 
   --color-page: #ffffff;
+
+  /* Terminal highlight: prompts, links, the caret, section chevrons. It is a
+     brightness step, not a hue — the site stays entirely grayscale. */
+  --color-accent: #171717;
 
   --color-gray-50: #fafafa;
   --color-gray-100: #f5f5f5;
@@ -25,21 +35,20 @@
 }
 
 /*
- * The dark theme is the same palette read backwards. Every utility resolves
- * through var(--color-gray-*), so reversing the scale here themes the whole
- * site: text-gray-900 becomes near-white, border-gray-200 becomes a dark
- * hairline, and bg-gray-100 chips darken — with no `dark:` classes in the
- * markup. This works because the design only ever uses the scale
- * directionally (dark text on a light page).
+ * The dark theme is the same palette read backwards. Every utility resolves through
+ * var(--color-gray-*), so reversing the scale here themes the whole site: no
+ * `dark:` classes in the markup. This works because the design only ever uses
+ * the scale directionally (dark text on a light page).
  */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --color-page: #0a0a0a;
+  --color-page: #08090a;
+  --color-accent: #fafafa;
 
   --color-gray-50: #171717;
   --color-gray-100: #262626;
-  --color-gray-200: #404040;
+  --color-gray-200: #333333;
   --color-gray-300: #525252;
   --color-gray-400: #737373;
   --color-gray-500: #a3a3a3;
@@ -73,4 +82,27 @@
 
 @utility text-balance {
   text-wrap: balance;
+}
+
+/* Block caret that trails the name, as a terminal would leave it. */
+@utility caret {
+  color: var(--color-accent);
+  animation: caret-blink 1.2s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
 }
