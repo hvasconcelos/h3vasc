@@ -2,6 +2,7 @@ import { experienceData } from '@/data/experience'
 import { educationData } from '@/data/education'
 import { socialLinks, SocialPlatform } from '@/data/social'
 import { blogPosts } from '@/data/writing'
+import CollapsibleSection from '@/components/CollapsibleSection'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { readFileSync } from 'fs'
@@ -64,7 +65,7 @@ export default function Home() {
   return (
     <main className="min-h-screen px-6 py-24 max-w-2xl mx-auto">
       {/* Header/Name */}
-      <header className="mb-16">
+      <header className="mb-12">
         <h1 className="text-4xl font-light tracking-tight text-gray-900 mb-2">
           Helder Vasconcelos
         </h1>
@@ -72,10 +73,7 @@ export default function Home() {
       </header>
 
       {/* Bio Section */}
-      <section className="mb-20 space-y-4">
-        <h2 className="text-xs uppercase tracking-wider text-gray-400 mb-6">
-          About
-        </h2>
+      <CollapsibleSection id="about" title="About" defaultOpen>
         <div className="space-y-4 text-gray-700 leading-relaxed prose prose-sm max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -95,13 +93,10 @@ export default function Home() {
             {markdownContent}
           </ReactMarkdown>
         </div>
-      </section>
+      </CollapsibleSection>
 
       {/* Experience Section */}
-      <section className="mb-20">
-        <h2 className="text-xs uppercase tracking-wider text-gray-400 mb-6">
-          Experience
-        </h2>
+      <CollapsibleSection id="experience" title="Experience">
         <div className="space-y-8">
           {experienceData.map((exp, index) => (
             <div
@@ -135,13 +130,10 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
+      </CollapsibleSection>
 
       {/* Education Section */}
-      <section className="mb-20">
-        <h2 className="text-xs uppercase tracking-wider text-gray-400 mb-6">
-          Education
-        </h2>
+      <CollapsibleSection id="education" title="Education">
         <div className="space-y-8">
           {educationData.map((edu, index) => (
             <div
@@ -158,13 +150,10 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
+      </CollapsibleSection>
 
       {/* Blog Posts Section */}
-      <section className="mb-20">
-        <h2 className="text-xs uppercase tracking-wider text-gray-400 mb-6">
-          Writing
-        </h2>
+      <CollapsibleSection id="writing" title="Writing">
         <ul className="space-y-6">
           {blogPosts.map((post) => (
             <li key={post.title}>
@@ -182,10 +171,10 @@ export default function Home() {
             </li>
           ))}
         </ul>
-      </section>
+      </CollapsibleSection>
 
       {/* Footer */}
-      <footer className="pt-12 border-t border-gray-200">
+      <footer className="pt-12">
         <div className="flex items-center justify-between">
           <p className="text-xs text-gray-400 font-mono">
             © {new Date().getFullYear()} Helder Vasconcelos
