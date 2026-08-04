@@ -22,12 +22,13 @@ const SITE = 'h3vasc.com'
 const LOCATION = 'Porto, Portugal'
 
 // Same values as the site's dark theme in global.css.
-const PAGE = '#08090a'
-const HAIRLINE = '#333333'
-const ACCENT = '#fafafa'
-const PRIMARY = '#fafafa'
-const SECONDARY = '#d4d4d4'
-const MUTED = '#a3a3a3'
+const PAGE = '#14120b'
+const HAIRLINE = '#2e2c26'
+const ACCENT = '#edecec'
+const PRIMARY = '#edecec'
+const SECONDARY = '#c6c5c3'
+const MUTED = '#969592'
+const CARET = '#3ff08a'
 
 // The site is set in JetBrains Mono, which exists here only as a webfont;
 // librsvg resolves families through the system, so this falls back to Menlo.
@@ -62,7 +63,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.
 
   <text x="404" y="224" font-family="${MONO}" font-size="19" fill="${MUTED}"><tspan fill="${ACCENT}">${escape(PROMPT_HOST)}</tspan>:~${escape(PROMPT_CMD)}</text>
 
-  <text x="404" y="288" font-family="${MONO}" font-size="47" font-weight="500" fill="${PRIMARY}" letter-spacing="-1">${escape(NAME)}<tspan fill="${ACCENT}"> ▋</tspan></text>
+  <text x="404" y="288" font-family="${MONO}" font-size="47" font-weight="500" fill="${PRIMARY}" letter-spacing="-1">${escape(NAME)}<tspan fill="${CARET}"> ▋</tspan></text>
   <text x="404" y="334" font-family="${MONO}" font-size="22" fill="${SECONDARY}">${escape(ROLE)}</text>
 
   <line x1="404" y1="372" x2="600" y2="372" stroke="${HAIRLINE}" stroke-width="1" />

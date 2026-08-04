@@ -106,7 +106,9 @@ Light and dark, toggled by `ThemeToggle.astro` in the header.
 
 ### Accent
 
-`--color-accent` marks the shell prompt, prose links and the caret. It is a **brightness step, not a hue** — the strongest end of the ramp (`#26251e` light, `#edecec` dark). The site is entirely grayscale; do not introduce a colour here. Bracketed tags deliberately use `text-gray-500` instead, so the 37 of them recede rather than compete with the prompt.
+`--color-accent` marks the shell prompt, prose links and section chevrons. It is a **brightness step, not a hue** — the strongest end of the ramp (`#26251e` light, `#edecec` dark). Bracketed tags deliberately use `text-gray-500` instead, so the 37 of them recede rather than compete with the prompt.
+
+`--color-caret` (`#0f7d45` light, `#3ff08a` dark) is the **only hue on the site**, and it dresses exactly one element: the blinking block caret after the name. Keep it that way — the phosphor green reads as a deliberate terminal signature precisely because nothing else competes with it. Do not reach for it on links, tags or headings.
 
 ### Color Palette
 
