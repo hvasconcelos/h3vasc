@@ -16,7 +16,7 @@ export const experienceData: Experience[] = [
     period: 'Nov 2018 - Present',
     location: 'Porto, Portugal · Hybrid',
     description: 'Building TAIKAI, Bepro , BakerFi, ChainCast and other web3 products.',
-    technologies: ['TypeScript', 'Solidity', 'Kubernetes', 'Ethereum', 'Node.js', "Rust", 'Web3']
+    technologies: ['TypeScript', 'C++', 'Kubernetes', 'LLM', 'Node.js', "Python", 'MLX']
   },
   {
     company: 'Euronext',
