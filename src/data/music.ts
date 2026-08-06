@@ -13,6 +13,37 @@ export interface MusicProject {
   releases: Release[]
 }
 
+export interface Track {
+  title: string
+  artist: string
+  /** Where to hear the whole thing. */
+  url: string
+  /** The looping excerpt, as paths under public/. */
+  src: string
+  /**
+   * Opus alternative, offered first. MP3 carries encoder padding that `loop`
+   * cannot skip, so it seams audibly on every restart; Opus stores its
+   * pre-skip in the container and every decoder honours it.
+   */
+  srcOpus: string
+}
+
+/**
+ * The loop behind the homepage. A standalone export rather than a field on the
+ * Re:Axis project below — it is not one of that project's five releases, and
+ * hanging an optional track off MusicProject would imply every project has one.
+ *
+ * It lives here rather than in AudioPlayer.astro so /index.md can credit it
+ * from the same data the page renders from.
+ */
+export const backgroundTrack: Track = {
+  title: 'Liquid Alchemy',
+  artist: 'Re:Axis',
+  url: 'https://open.spotify.com/track/16Gd4FXepCBPptdJZgFVey?si=2e40435ef8884764',
+  src: '/reaxis-liquid-alchemy-loop.mp3',
+  srcOpus: '/reaxis-liquid-alchemy-loop.ogg',
+}
+
 /** Discography data from https://www.discogs.com */
 export const musicProjects: MusicProject[] = [
   {

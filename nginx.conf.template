@@ -74,6 +74,16 @@ server {
         add_header Cache-Control "public, max-age=86400" always;
     }
 
+    # The background loop is copied verbatim out of public/, so the name is not
+    # fingerprinted — a month rather than a year, like the icon set above.
+    # mime.types already maps .mp3 to audio/mpeg and .ogg to audio/ogg, so only
+    # the caching is missing here. Deliberately absent from gzip_types: both
+    # formats are already compressed and re-compressing them only burns CPU.
+    location ~* \.(mp3|ogg)$ {
+        access_log off;
+        add_header Cache-Control "public, max-age=2592000" always;
+    }
+
     location / {
         try_files $uri $uri/ $uri.html =404;
     }

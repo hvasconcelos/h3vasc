@@ -30,6 +30,7 @@ hvasc-web/
 │   ├── layouts/
 │   │   └── Layout.astro         # <head>, font imports, metadata, JSON-LD
 │   ├── components/
+│   │   ├── AudioPlayer.astro
 │   │   ├── CollapsibleSection.astro
 │   │   ├── SocialIcon.astro
 │   │   ├── ThemeToggle.astro
@@ -46,7 +47,8 @@ hvasc-web/
 │   │   └── content.ts           # Renders src/data as Markdown
 │   └── styles/
 │       └── global.css
-├── public/                      # avatar.jpg, og.png, the icon set, site.webmanifest
+├── public/                      # avatar.jpg, og.png, the icon set, site.webmanifest,
+│                                #   reaxis-liquid-alchemy-loop.{ogg,mp3}
 ├── astro.config.mjs
 ├── Dockerfile
 ├── nginx.conf.template
@@ -76,6 +78,7 @@ There is no lint script. `npm run check` is the closest equivalent and should pa
 - **Side projects** → `src/data/projects.ts` (`Project[]`). Names and descriptions are copied verbatim from GitHub; refresh them with `gh api repos/<owner>/<repo>` rather than paraphrasing. Deliberately no star counts — they would go stale in a static build.
 - **Education** → `src/data/education.ts` (`Education[]`)
 - **Writing** → `src/data/writing.ts` (`BlogPost[]`)
+- **Background track** → `backgroundTrack` in `src/data/music.ts` (`Track`). Metadata for the homepage loop; see Background Music below.
 - **Social links** → `src/data/social.ts` (`SocialLink[]`). The `platform` field selects an SVG in `SocialIcon.astro`; adding a new platform means widening the `SocialPlatform` union and adding a branch there.
 
 ## Sections and Collapsing
@@ -149,6 +152,40 @@ When previewing output, note that **chained `.resize()` calls in one sharp pipel
 
 There is deliberately **no SVG favicon** — browsers prefer `image/svg+xml` over every other `rel="icon"`, so one would silently beat the photo. The old `h` glyph at `public/favicon.svg` was removed for exactly that reason; do not reinstate it without also dropping the PNGs.
 
+## Background Music
+
+`AudioPlayer.astro`, in the homepage header only — 404 shares `Layout` but not that header. Track metadata is `backgroundTrack` in `src/data/music.ts`; the audio itself is `public/reaxis-liquid-alchemy-loop.{ogg,mp3}`.
+
+### The state model — read this before touching the script
+
+Two independent flags. Everything visible is derived from both, and **nothing reads `audio.paused` to decide what the UI shows.**
+
+| Flag | Means | Changed by | Persisted |
+| --- | --- | --- | --- |
+| `intent` | the visitor wants sound | **only** a click on the toggle | yes, `localStorage['music']` |
+| `unlocked` | the browser is allowing playback | `play()` resolving or rejecting | never |
+
+`soundOn = intent && unlocked`, computed in one place (`render()`).
+
+**The `visibilitychange` handler calls `audio.pause()` and touches neither flag.** That is exactly what makes "pause → switch tabs → return" stay paused while "playing → switch tabs → return" resumes. Collapsing these into one boolean is the bug this design exists to prevent — if you find yourself adding a third piece of state, you are probably about to reintroduce it.
+
+### The rest of the load-bearing details
+
+- **Autoplay is attempted, not assumed.** Browsers require a user gesture for audible playback, so `attemptPlay()` falls back to arming gesture listeners via an `AbortController`. Those listeners are dropped only once a `play()` actually **resolves** — never on the first event to arrive, or a scroll spends the one attempt on browsers that do not count scrolling as activation.
+- **Muting calls `disarm()`.** Otherwise a later scroll restarts music the visitor just turned off.
+- **The click handler branches on `intent && unlocked`, not `intent`.** While autoplay is blocked the button reads "play" even though intent is already true; clicking must start playback, not flip an invisible flag.
+- **The `sound-on:` variant** in `global.css` drives the icon swap in pure CSS, mirroring `dark:`. Unlike `dark:` it has **no pre-paint script**, deliberately: at first paint nothing is playing whatever `localStorage` says, because the browser has not ruled on autoplay yet. "Off" is the only honest initial render.
+- **`preload="none"`.** Most visitors' autoplay is refused and some never interact; eagerly fetching ~0.8 MB of audio they may never hear would compete with the fonts and the avatar for early bandwidth.
+- **Opus is offered first, MP3 second.** MP3 carries encoder padding that `loop` cannot skip, so it seams audibly on every restart — on techno that reads as a dropped beat. Opus stores its pre-skip in the container and every decoder honours it. The `.ogg` extension rather than `.opus` is deliberate: nginx's `mime.types` has `audio/ogg ogg` and **no** `.opus` entry.
+- **Never ship a `.mpeg` extension.** nginx maps it to `video/mpeg`, and `nginx.conf.template` already sends `X-Content-Type-Options: nosniff`, so the browser is forbidden from sniffing past the wrong type. It works in `astro dev` and fails in production — the worst failure shape there is.
+- **The info panel is the APG disclosure pattern** (`aria-expanded` + `aria-controls`), hand-rolled rather than the native `popover` attribute: a popover is promoted to the top layer, whose containing block is the viewport, so `absolute top-full right-0` cannot anchor to the button. It uses the `hidden` **attribute** rather than an opacity utility, which takes the Spotify link out of the tab order when closed.
+- **No `aria-pressed` on the play/pause button.** Its accessible name already changes between "Play background music" and "Pause background music"; adding `aria-pressed` on top produces the "paused, pressed" double-negation. Pick one mechanism, not both.
+
+### Limits worth knowing before "fixing" them
+
+- **OS-level muting is undetectable.** Device muted, tab muted in Chrome, or the iOS ringer switch — `play()` resolves, `unlocked` goes true, and the button reads "Pause" while nothing is audible. No API exposes this. Do not try to infer it from `AudioContext` state; the heuristics are unreliable and guessing wrong is worse.
+- **`prefers-reduced-motion` does not apply to audio.** It is a motion query and there is no reduced-sound equivalent. Gating playback on it would invent a preference the visitor never expressed.
+
 ## Analytics
 
 Umami, emitted by `Layout.astro`. Cookieless, so there is nothing to put behind a consent banner and none is added.
@@ -184,10 +221,12 @@ Light and dark, toggled by `ThemeToggle.astro` in the header.
 
 Two tokens carry the terminal green, and they are **theme-asymmetric on purpose**:
 
-- `--color-terminal` (`#0f7d45` light, `#3ff08a` dark) — the blinking block caret only.
+- `--color-terminal` (`#0f7d45` light, `#3ff08a` dark) — the blinking block caret and the background-music play/pause icon. Those two, and nothing else.
 - `--color-label` (`#71716b` light, `#3ff08a` dark) — the six section labels. Green works against the dark page but turns into a lime highlighter on the warm light page, so **light deliberately keeps the muted gray**. Do not "fix" this into a single value.
 
 The green is the only hue on the site and it stays scarce; do not extend it to links, tags or body headings. Label contrast holds either way: 4.58:1 light, 12.53:1 dark.
+
+The play/pause icon is the one deliberate extension beyond the caret: it marks the only control on the page that makes noise, which is worth one glance of colour. It is an icon rather than text, so it answers to the 3:1 non-text contrast threshold — `#0f7d45` on the light page clears that comfortably. The theme toggle beside it deliberately stays `gray-400`; two green controls side by side would spend the scarcity for nothing.
 
 ### Color Palette
 

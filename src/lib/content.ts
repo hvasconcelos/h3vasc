@@ -9,7 +9,7 @@
 import bioMarkdown from '../data/bio.md?raw'
 import { educationData } from '../data/education'
 import { experienceData } from '../data/experience'
-import { musicProjects } from '../data/music'
+import { backgroundTrack, musicProjects } from '../data/music'
 import { projects } from '../data/projects'
 import { socialLinks, sourceRepo } from '../data/social'
 import { talks } from '../data/talks'
@@ -91,6 +91,7 @@ export function renderSiteMarkdown(origin: string): string {
         .join('\n'),
 
       '## Music',
+      `*${backgroundTrack.title}* by ${backgroundTrack.artist} loops in the background of the homepage — [listen on Spotify](${backgroundTrack.url}).`,
       ...musicList,
 
       '## Experience',

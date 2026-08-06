@@ -37,6 +37,7 @@ hvasc-web/
 │   ├── layouts/
 │   │   └── Layout.astro         # <head>, fonts, metadata
 │   ├── components/
+│   │   ├── AudioPlayer.astro          # background music + play/pause control
 │   │   ├── CollapsibleSection.astro
 │   │   ├── SocialIcon.astro
 │   │   ├── ThemeToggle.astro
@@ -59,7 +60,8 @@ hvasc-web/
 │   ├── favicon.ico              # Icon set          (npm run icons)
 │   ├── apple-touch-icon.png
 │   ├── icon-192.png
-│   └── site.webmanifest
+│   ├── site.webmanifest
+│   └── reaxis-liquid-alchemy-loop.ogg   # background music (+ .mp3 fallback)
 ├── astro.config.mjs
 ├── Dockerfile
 └── nginx.conf.template
@@ -114,6 +116,30 @@ Links to the site unfurl with `public/og.png`, a 1200×630 card. It is generated
 The favicon, the iOS touch icon and the two manifest icons are all cut from `public/avatar.jpg` by `npm run icons`. Like the social card they are committed rather than built, so regenerate them after changing the avatar.
 
 The photo is desaturated and otherwise left alone, matching the site's grayscale palette. It is cropped to a square around the head first — the source has a lot of empty backdrop, which at 16px would be most of the icon.
+
+## Background music
+
+The homepage loops Re:Axis — *Liquid Alchemy*, with a play/pause button in the header; hovering or focusing it reveals the track credit and a Spotify link. Track metadata is `backgroundTrack` in `src/data/music.ts`; the audio lives in `public/`.
+
+**It does not reliably autoplay, and cannot.** Browsers require a user gesture before playing audible media, so the player attempts playback on load and, when refused, retries on the visitor's first interaction. Safari in particular refuses by default — those visitors hear nothing until they press play. This is browser policy, not a gap in the implementation.
+
+Two encodings are shipped and the browser picks:
+
+| File | Size | Why |
+| --- | --- | --- |
+| `reaxis-liquid-alchemy-loop.ogg` | ~0.82 MB | Opus, offered first — loops gaplessly |
+| `reaxis-liquid-alchemy-loop.mp3` | ~1.10 MB | fallback for anything without Opus |
+
+MP3 carries encoder padding that `loop` cannot skip, so it produces an audible seam on every restart. Opus does not. To regenerate from a new source:
+
+```bash
+ffmpeg -i source.wav -c:a libopus -b:a 96k -vbr on -application audio \
+  public/reaxis-liquid-alchemy-loop.ogg
+ffmpeg -i source.wav -c:a libmp3lame -b:a 128k -ar 44100 -map_metadata -1 \
+  -id3v2_version 0 public/reaxis-liquid-alchemy-loop.mp3
+```
+
+Behaviour: the play/pause choice persists in `localStorage`; playback pauses when the tab is hidden and resumes on return, but only if it was not already paused; `preload="none"` means the audio is not fetched until it is actually wanted. The icon is the site's terminal green — the only control on the page that makes noise.
 
 ## Analytics
 

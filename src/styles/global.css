@@ -4,6 +4,13 @@
    script in Layout.astro stamps on <html> before first paint. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
+/* Enables `sound-on:` utilities, driven by the data-music attribute the
+   AudioPlayer script stamps on <html>. Unlike `dark` above there is no
+   pre-paint script behind this one, and deliberately so: at first paint
+   nothing is playing yet whatever localStorage says, because the browser has
+   not ruled on autoplay. "Off" is the only honest initial render. */
+@custom-variant sound-on (&:where([data-music='on'], [data-music='on'] *));
+
 /*
  * Tailwind v4 is configured in CSS. This block replaces the old
  * tailwind.config.ts.
