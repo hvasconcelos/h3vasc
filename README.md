@@ -113,7 +113,7 @@ Links to the site unfurl with `public/og.png`, a 1200×630 card. It is generated
 
 The favicon, the iOS touch icon and the two manifest icons are all cut from `public/avatar.jpg` by `npm run icons`. Like the social card they are committed rather than built, so regenerate them after changing the avatar.
 
-The photo is reduced to the two ends of the theme ramp and ordered-dithered, which is what gives it the grayscale halftone look. The dither is applied once to a 512px master and every size is downscaled from that — the halftone reads at 180px and up, and averages back into smooth grey below. Dithering each size on its own makes 16px unreadable.
+The photo is desaturated and otherwise left alone, matching the site's grayscale palette. It is cropped to a square around the head first — the source has a lot of empty backdrop, which at 16px would be most of the icon.
 
 ## Theming
 
