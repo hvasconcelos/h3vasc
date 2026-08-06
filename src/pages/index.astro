@@ -273,14 +273,43 @@ const year = new Date().getFullYear()
         <p class="font-mono text-xs text-gray-400">
           © {year} Hélder Vasconcelos
           <span aria-hidden="true"> · </span>
-          {/* The site is MIT, so say so where someone might act on it. */}
+          {/*
+            The site is MIT, so say so where someone might act on it. Narrow
+            screens get the fork glyph instead of the words — the footer line
+            is tight on a phone, and the aria-label names the link either way,
+            so the icon is never the only thing carrying the meaning.
+
+            A fork glyph rather than the GitHub mark on purpose: the icon row
+            to the right already has GitHub, pointing at the profile, and two
+            identical marks in one footer would read as the same destination.
+          */}
           <a
             href={sourceRepo}
             target="_blank"
             rel="noopener noreferrer"
-            class="underline decoration-gray-200 underline-offset-4 transition-colors hover:text-gray-900 hover:decoration-gray-400"
+            aria-label="Fork this site on GitHub"
+            class="transition-colors hover:text-gray-900"
           >
-            fork it
+            <svg
+              class="inline h-4 w-4 align-middle sm:hidden"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="18" r="3" />
+              <circle cx="6" cy="6" r="3" />
+              <circle cx="18" cy="6" r="3" />
+              <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9" />
+              <path d="M12 12v3" />
+            </svg>
+            <span
+              class="hidden underline decoration-gray-200 underline-offset-4 transition-colors hover:decoration-gray-400 sm:inline"
+              >fork it</span
+            >
           </a>
         </p>
         <div class="flex items-center gap-4">
