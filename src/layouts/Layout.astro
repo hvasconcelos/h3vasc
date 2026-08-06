@@ -14,6 +14,11 @@ interface Props {
 const { title, description, image = '/og.png' } = Astro.props
 const canonical = new URL(Astro.url.pathname, Astro.site)
 const socialImage = new URL(image, Astro.site)
+
+// Stable @id for the Person node, referenced from every other node in the
+// JSON-LD graph below.
+const site = Astro.site?.href
+const personId = `${site}#helder-vasconcelos`
 ---
 
 <!doctype html>
@@ -31,6 +36,18 @@ const socialImage = new URL(image, Astro.site)
     />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/*
+      The Markdown twin of this page, generated from the same src/data modules.
+      Agents that would otherwise strip tags off the HTML can fetch this
+      instead; /llms.txt points at it as well.
+    */}
+    <link
+      rel="alternate"
+      type="text/markdown"
+      href="/index.md"
+      title="This page as Markdown"
+    />
 
     {/*
       Runs before first paint so the page never flashes the wrong theme.
@@ -74,26 +91,100 @@ const socialImage = new URL(image, Astro.site)
       content="Hélder Vasconcelos — Chief Technology Officer at LayerX"
     />
 
+    {/*
+      A @graph rather than a bare Person, so the page, the site and the person
+      are separate nodes that reference each other by @id. That is what lets a
+      consumer tell "this page is about him" from "he wrote this", instead of
+      inferring both from one flat object.
+    */}
     <script
       type="application/ld+json"
       is:inline
       set:html={JSON.stringify({
         '@context': 'https://schema.org',
-        '@type': 'Person',
-        name: 'Hélder Vasconcelos',
-        url: Astro.site?.href,
-        image: socialImage.href,
-        jobTitle: 'Chief Technology Officer',
-        worksFor: { '@type': 'Organization', name: 'LayerX', url: 'https://layerx.xyz' },
-        address: {
-          '@type': 'PostalAddress',
-          addressLocality: 'Porto',
-          addressCountry: 'PT',
-        },
-        sameAs: [
-          'https://github.com/hvasconcelos',
-          'https://linkedin.com/in/heldervasc',
-          'https://x.com/heldervasc',
+        '@graph': [
+          {
+            '@type': 'ProfilePage',
+            '@id': `${site}#page`,
+            url: canonical.href,
+            name: title,
+            description,
+            inLanguage: 'en-GB',
+            isPartOf: { '@id': `${site}#website` },
+            about: { '@id': personId },
+            mainEntity: { '@id': personId },
+            primaryImageOfPage: socialImage.href,
+          },
+          {
+            '@type': 'WebSite',
+            '@id': `${site}#website`,
+            url: site,
+            name: 'Hélder Vasconcelos',
+            description,
+            inLanguage: 'en-GB',
+            publisher: { '@id': personId },
+          },
+          {
+            '@type': 'Person',
+            '@id': personId,
+            name: 'Hélder Vasconcelos',
+            alternateName: 'Helder Vasconcelos',
+            givenName: 'Hélder',
+            familyName: 'Vasconcelos',
+            url: site,
+            mainEntityOfPage: { '@id': `${site}#page` },
+            image: socialImage.href,
+            description,
+            jobTitle: 'Chief Technology Officer',
+            hasOccupation: {
+              '@type': 'Occupation',
+              name: 'Chief Technology Officer',
+              occupationLocation: { '@type': 'City', name: 'Porto' },
+            },
+            worksFor: {
+              '@type': 'Organization',
+              name: 'LayerX',
+              url: 'https://layerx.xyz',
+            },
+            alumniOf: {
+              '@type': 'CollegeOrUniversity',
+              name: 'Universidade de Aveiro',
+              url: 'https://www.ua.pt',
+            },
+            knowsAbout: [
+              'Agentic workflows',
+              'LLM inference',
+              'High performance systems',
+              'Real-time trading systems',
+              'Distributed systems',
+              'Apple Silicon and MLX',
+              'Smart contracts and DeFi',
+            ],
+            knowsLanguage: ['en', 'pt'],
+            nationality: { '@type': 'Country', name: 'Portugal' },
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: 'Porto',
+              addressCountry: 'PT',
+            },
+            sameAs: [
+              'https://github.com/hvasconcelos',
+              'https://linkedin.com/in/heldervasc',
+              'https://x.com/heldervasc',
+              'https://taikai.network/heldervasc',
+            ],
+          },
+          {
+            '@type': 'Book',
+            '@id': `${site}#asynchronous-android-programming`,
+            name: 'Asynchronous Android Programming',
+            bookEdition: 'Second Edition',
+            author: { '@id': personId },
+            publisher: { '@type': 'Organization', name: 'Packt Publishing' },
+            datePublished: '2016',
+            isbn: '9781785880165',
+            url: 'https://www.packtpub.com/product/asynchronous-android-programming-second-edition/9781785880165',
+          },
         ],
       })}
     />
