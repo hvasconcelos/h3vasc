@@ -90,10 +90,6 @@ export function renderSiteMarkdown(origin: string): string {
         })
         .join('\n'),
 
-      '## Music',
-      `*${backgroundTrack.title}* by ${backgroundTrack.artist} loops in the background of the homepage — [listen on Spotify](${backgroundTrack.url}).`,
-      ...musicList,
-
       '## Experience',
       ...experienceList,
 
@@ -101,6 +97,10 @@ export function renderSiteMarkdown(origin: string): string {
       educationData
         .map((edu) => `- ${edu.institution} — ${edu.degree} (${edu.period})`)
         .join('\n'),
+
+      '## Music',
+      `*${backgroundTrack.title}* by ${backgroundTrack.artist} loops in the background of the homepage — [listen on Spotify](${backgroundTrack.url}).`,
+      ...musicList,
 
       '## Elsewhere',
       socialLinks.map((link) => `- [${link.name}](${link.url})`).join('\n'),
