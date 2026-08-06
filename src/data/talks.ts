@@ -24,4 +24,9 @@ export const talks: Talk[] = [
     event: 'Swords Health Office',
     date: 'February 2026',
   },
+  {
+    title: 'Tracing Web3 Tech Stack Evolutionary Steps',
+    event: 'DeHouse',
+    date: 'December 2024',
+  },
 ]
