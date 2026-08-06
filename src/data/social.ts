@@ -6,6 +6,13 @@ export interface SocialLink {
   platform: SocialPlatform
 }
 
+/**
+ * This site's own source. Deliberately not a member of socialLinks below —
+ * that array is profiles, and every entry in it renders an icon in the footer
+ * row. This one is a repository and renders as text next to the copyright.
+ */
+export const sourceRepo = 'https://github.com/hvasconcelos/hvascdev'
+
 export const socialLinks: SocialLink[] = [
   {
     name: 'GitHub',

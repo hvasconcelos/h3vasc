@@ -11,7 +11,7 @@ import { educationData } from '../data/education'
 import { experienceData } from '../data/experience'
 import { musicProjects } from '../data/music'
 import { projects } from '../data/projects'
-import { socialLinks } from '../data/social'
+import { socialLinks, sourceRepo } from '../data/social'
 import { blogPosts } from '../data/writing'
 
 export const NAME = 'Hélder Vasconcelos'
@@ -93,7 +93,10 @@ export function renderSiteMarkdown(origin: string): string {
         .join('\n'),
 
       '## Elsewhere',
-      socialLinks.map((link) => `- [${link.name}](${link.url})`).join('\n')
+      socialLinks.map((link) => `- [${link.name}](${link.url})`).join('\n'),
+
+      '## Source',
+      `This site is open source and MIT licensed — [fork it](${sourceRepo}).`
     ) + '\n'
   )
 }
@@ -115,6 +118,7 @@ export function renderLlmsTxt(origin: string): string {
       [
         `- [Full profile in Markdown](${origin}/index.md): about, side projects, writing, music, experience and education`,
         `- [Homepage](${origin}/): the same content as HTML`,
+        `- [Source](${sourceRepo}): the site's own repository, MIT licensed`,
       ].join('\n'),
 
       '## Writing',

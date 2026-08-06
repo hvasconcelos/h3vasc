@@ -8,7 +8,7 @@ import { educationData } from '../data/education'
 import { experienceData } from '../data/experience'
 import { musicProjects } from '../data/music'
 import { projects } from '../data/projects'
-import { socialLinks } from '../data/social'
+import { socialLinks, sourceRepo } from '../data/social'
 import { blogPosts } from '../data/writing'
 
 const year = new Date().getFullYear()
@@ -215,6 +215,16 @@ const year = new Date().getFullYear()
       <div class="flex items-center justify-between">
         <p class="font-mono text-xs text-gray-400">
           © {year} Hélder Vasconcelos
+          <span aria-hidden="true"> · </span>
+          {/* The site is MIT, so say so where someone might act on it. */}
+          <a
+            href={sourceRepo}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline decoration-gray-200 underline-offset-4 transition-colors hover:text-gray-900 hover:decoration-gray-400"
+          >
+            fork it
+          </a>
         </p>
         <div class="flex items-center gap-4">
           {

@@ -7,16 +7,19 @@
  * the site's grayscale-only rule asks for. No contrast curve, no halftone — a
  * plain grey headshot.
  *
- * The avatar is a 1024x1024 head sitting in a lot of empty backdrop. At 16px
- * that backdrop is most of the icon and the face turns to mush, so everything
- * is cut from a tighter square around the head first.
+ * The avatar is a 1024x1024 head sitting in a lot of empty backdrop, and the
+ * icons are cut from a square inside it. That square trades two things off:
+ * tighter fills the frame with the face and survives 16px better, wider leaves
+ * the head more room to breathe. See CROP below.
  */
 import sharp from 'sharp'
 import { writeFile } from 'node:fs/promises'
 
-// A square cut from the 1024x1024 source: hairline to just under the chin,
-// centred on the face rather than on the frame.
-const CROP = { left: 180, top: 55, width: 660, height: 660 }
+// A square cut from the 1024x1024 source, horizontally centred on the face
+// rather than on the frame. At 860 of 1024 the head keeps a clear margin of
+// backdrop on every side. Widen towards 1024 for more still — but the face
+// shrinks with it, and much past this it stops resolving at 16px.
+const CROP = { left: 82, top: 0, width: 860, height: 860 }
 
 // The dark theme's page colour, from global.css. Only ever shows through if a
 // consumer composites the icon over its own surface.
