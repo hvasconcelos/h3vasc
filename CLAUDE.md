@@ -149,6 +149,24 @@ When previewing output, note that **chained `.resize()` calls in one sharp pipel
 
 There is deliberately **no SVG favicon** — browsers prefer `image/svg+xml` over every other `rel="icon"`, so one would silently beat the photo. The old `h` glyph at `public/favicon.svg` was removed for exactly that reason; do not reinstate it without also dropping the PNGs.
 
+## Analytics
+
+Umami, emitted by `Layout.astro`. Cookieless, so there is nothing to put behind a consent banner and none is added.
+
+Configured by two environment variables, typed in `src/env.d.ts`:
+
+| Variable | Purpose |
+| --- | --- |
+| `PUBLIC_UMAMI_WEBSITE_ID` | The site's Umami ID. **Unset means the script tag is not emitted at all.** |
+| `PUBLIC_UMAMI_SRC` | Script origin; defaults to Umami Cloud. Only needed when self-hosting. |
+
+Four things to keep in mind:
+
+- **Keep it environment-driven, not hardcoded.** The absent-by-default behaviour is the point: `npm run dev` sends nothing, and since the repo is MIT and the footer invites forking, a fork that has not set its own ID must not report into this site's dashboard.
+- **`PUBLIC_*` is inlined at build time**, not read at runtime. `docker run -e` is too late — the Dockerfile takes `ARG PUBLIC_UMAMI_WEBSITE_ID` / `ARG PUBLIC_UMAMI_SRC` in the build stage for this reason.
+- **The src fallback uses `||`, not `??`.** An unset Docker `ARG` forwarded through `ENV` arrives as an empty string rather than `undefined`, and `??` would accept it and emit `src=""`.
+- **The tag is `is:inline`.** It must stay the exact tag Umami serves, loaded from their origin — letting Astro bundle it would fold a third-party script into the site's own JS.
+
 ## Theming
 
 Light and dark, toggled by `ThemeToggle.astro` in the header.

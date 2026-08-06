@@ -19,6 +19,18 @@ const socialImage = new URL(image, Astro.site)
 // JSON-LD graph below.
 const site = Astro.site?.href
 const personId = `${site}#helder-vasconcelos`
+
+// Umami — cookieless analytics, so there is nothing here to put behind a
+// consent banner. Both values come from the environment rather than the
+// repository, which matters twice over: `npm run dev` reports nothing, and a
+// fork that does not set them ships no tracker instead of quietly counting
+// its visitors into this site's dashboard.
+// `||` rather than `??` on the src: an unset Docker ARG forwarded through ENV
+// arrives as an empty string, not as undefined, and `??` would happily use it
+// as the script URL.
+const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID
+const umamiSrc =
+  import.meta.env.PUBLIC_UMAMI_SRC || 'https://cloud.umami.is/script.js'
 ---
 
 <!doctype html>
@@ -77,6 +89,17 @@ const personId = `${site}#helder-vasconcelos`
           stored === 'light' ? 'light' : 'dark'
       })()
     </script>
+
+    {/*
+      is:inline keeps Astro's bundler away from it — this has to stay the exact
+      tag Umami serves, loaded from their origin, not something rolled into the
+      site's own JS.
+    */}
+    {
+      umamiWebsiteId && (
+        <script is:inline defer src={umamiSrc} data-website-id={umamiWebsiteId} />
+      )
+    }
 
     <meta property="og:type" content="profile" />
     <meta property="og:site_name" content="Hélder Vasconcelos - Personal Website" />

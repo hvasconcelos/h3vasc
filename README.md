@@ -115,6 +115,30 @@ The favicon, the iOS touch icon and the two manifest icons are all cut from `pub
 
 The photo is desaturated and otherwise left alone, matching the site's grayscale palette. It is cropped to a square around the head first — the source has a lot of empty backdrop, which at 16px would be most of the icon.
 
+## Analytics
+
+[Umami](https://umami.is), which is cookieless and stores no personal data — hence no consent banner. It is **off unless configured**:
+
+```bash
+cp .env.example .env      # then fill in PUBLIC_UMAMI_WEBSITE_ID
+```
+
+| Variable | Required | Default |
+| --- | --- | --- |
+| `PUBLIC_UMAMI_WEBSITE_ID` | yes, to enable | — (unset ⇒ no script emitted) |
+| `PUBLIC_UMAMI_SRC` | only when self-hosting | `https://cloud.umami.is/script.js` |
+
+With no ID set, the tag is not emitted at all — so `npm run dev` reports nothing, and a fork that has not configured its own ID does not count visitors into somebody else's dashboard.
+
+Both are read at **build** time, since Astro inlines `PUBLIC_*` into the static HTML. Set them where the build runs:
+
+- **Vercel** — Project Settings → Environment Variables, then redeploy.
+- **Docker** — build arguments, not `docker run -e`, which would be too late:
+
+  ```bash
+  docker build --build-arg PUBLIC_UMAMI_WEBSITE_ID=xxxx -t hvasc-web .
+  ```
+
 ## Theming
 
 The site ships light and dark themes, switched by the button in the header. **Dark is the default** — it is set on `<html>` in the served markup, so it holds even without JavaScript, and your OS setting is not consulted. Choosing light from the toggle is remembered in `localStorage`.
