@@ -127,6 +127,7 @@ export function renderLlmsTxt(origin: string): string {
       '## Content',
       [
         `- [Full profile in Markdown](${origin}/index.md): about, side projects, writing, music, experience and education`,
+        `- [Everything in one file](${origin}/llms-full.txt): the same document, under the llms.txt companion name`,
         `- [Homepage](${origin}/): the same content as HTML`,
         `- [Source](${sourceRepo}): the site's own repository, MIT licensed`,
       ].join('\n'),

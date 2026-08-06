@@ -1,3 +1,28 @@
+# Both maps below are http-context directives. This file is rendered into
+# /etc/nginx/conf.d/, which the stock nginx.conf includes inside http {}, so
+# they belong here — above the server block, not in it.
+
+# Which representation of the homepage to serve. An agent that asks for
+# Markdown gets the twin; everyone else gets the HTML. The regex is unanchored
+# and ignores q-values — nginx cannot parse those — so a client that lists
+# text/markdown at all is taken to want it. Browsers never do; the Accept
+# header Chrome and Safari send has no Markdown in it.
+map $http_accept $homepage {
+    default            /index.html;
+    "~*text/markdown"  /index.md;
+}
+
+# Link headers (RFC 8288), so the alternate representation, the sitemap and the
+# agent index are all discoverable from a HEAD request. The same three are in
+# <head>, but finding them there means fetching and parsing the HTML first.
+# Relative references on purpose: they resolve against the request URI, which
+# keeps the domain in astro.config.mjs and nowhere else.
+map $uri $agent_link {
+    default    '';
+    ~\.html$   '</index.md>; rel="alternate"; type="text/markdown", </sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby"';
+    /index.md  '</>; rel="alternate"; type="text/html", </sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby"';
+}
+
 server {
     # No IPv6 listener: some container runtimes ship without IPv6 and nginx
     # refuses to start when the address family is missing.
@@ -16,9 +41,17 @@ server {
     # which covers text/html, text/plain and text/xml.
     charset utf-8;
 
+    # add_header does not merge across levels: a location that declares even
+    # one add_header of its own inherits *none* of these. Every location below
+    # that sets a header therefore repeats the whole set. Adding a header to a
+    # location without repeating them silently drops all four.
+    #
+    # Link carries an empty value on everything that is not a page, and
+    # add_header omits a header whose value is empty, so assets are unaffected.
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Link $agent_link always;
 
     gzip            on;
     gzip_vary       on;
@@ -32,21 +65,43 @@ server {
         image/svg+xml;
 
     # Astro fingerprints everything under /_astro/, so it can be cached forever.
+    # nosniff matters most here of anywhere — this is the JavaScript and CSS.
     location /_astro/ {
         access_log off;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header Cache-Control "public, max-age=31536000, immutable" always;
     }
 
     # Fonts are fingerprinted too, but may be requested from other origins.
     location ~* \.(woff2?|ttf|otf)$ {
         access_log off;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header Cache-Control "public, max-age=31536000, immutable" always;
         add_header Access-Control-Allow-Origin "*" always;
     }
 
+    # The homepage answers to Accept. `rewrite ... last` rather than try_files:
+    # it re-runs location matching, which is what lands the Markdown case in
+    # `location = /index.md` below and gets it labelled text/markdown.
+    # try_files would serve the file from here instead, and nginx would type it
+    # from its own mime.types — which has no .md entry.
+    location = / {
+        rewrite ^ $homepage last;
+    }
+
     # HTML is revalidated so a redeploy is picked up immediately.
     location = /index.html {
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Link $agent_link always;
         add_header Cache-Control "no-cache" always;
+        # This URL has two representations, so a cache must key on Accept.
+        add_header Vary "Accept" always;
     }
 
     # The Markdown twin. nginx's bundled mime.types has no entry for .md, so
@@ -56,7 +111,12 @@ server {
     location = /index.md {
         types { }
         default_type "text/markdown; charset=utf-8";
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Link $agent_link always;
         add_header Cache-Control "no-cache" always;
+        add_header Vary "Accept" always;
         add_header Access-Control-Allow-Origin "*" always;
     }
 
@@ -71,6 +131,9 @@ server {
     # are not fingerprinted, so this is a day rather than a year.
     location ~* ^/(favicon\.ico|favicon-96x96\.png|apple-touch-icon\.png|icon-(192|512)\.png)$ {
         access_log off;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header Cache-Control "public, max-age=86400" always;
     }
 
@@ -81,6 +144,9 @@ server {
     # formats are already compressed and re-compressing them only burns CPU.
     location ~* \.(mp3|ogg)$ {
         access_log off;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header Cache-Control "public, max-age=2592000" always;
     }
 

@@ -1,4 +1,28 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "</index.md>; rel=\"alternate\"; type=\"text/markdown\", </sitemap.xml>; rel=\"sitemap\", </llms.txt>; rel=\"describedby\""
+        }
+      ]
+    },
+    {
+      "source": "/index.md",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "</>; rel=\"alternate\"; type=\"text/html\", </sitemap.xml>; rel=\"sitemap\", </llms.txt>; rel=\"describedby\""
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ]
 }

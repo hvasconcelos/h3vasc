@@ -28,6 +28,7 @@ export const GET: APIRoute = ({ site }) => {
   const body = [
     `# Full content as Markdown: ${origin}/index.md`,
     `# Index for agents:         ${origin}/llms.txt`,
+    `# Everything in one file:   ${origin}/llms-full.txt`,
     '',
     'User-agent: *',
     'Allow: /',
