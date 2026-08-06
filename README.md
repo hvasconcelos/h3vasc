@@ -119,7 +119,17 @@ The photo is desaturated and otherwise left alone, matching the site's grayscale
 
 ## Background music
 
-The homepage loops Re:Axis — *Liquid Alchemy*, with a play/pause button in the header; hovering or focusing it reveals the track credit and a Spotify link. Track metadata is `backgroundTrack` in `src/data/music.ts`; the audio lives in `public/`.
+The homepage loops Re:Axis — *Liquid Alchemy*, with a play/pause button in the header. Track metadata is `backgroundTrack` in `src/data/music.ts`; the audio lives in `public/`.
+
+The credit panel (artist, title, Spotify link) opens three ways, so every input method reaches it:
+
+| Input | Opens | Closes |
+| --- | --- | --- |
+| Mouse | hover | move away |
+| Keyboard | focus the button (Tab again lands in the link) | focus leaves |
+| Touch | tap — which also starts the music | tap elsewhere |
+
+Any of them also closes on Escape or on scroll. Touch needs its own path because a touch pointer stops existing when the finger lifts, and iOS Safari does not focus buttons on tap — so neither hover nor focus survives a tap.
 
 **It does not reliably autoplay, and cannot.** Browsers require a user gesture before playing audible media, so the player attempts playback on load and, when refused, retries on the visitor's first interaction. Safari in particular refuses by default — those visitors hear nothing until they press play. This is browser policy, not a gap in the implementation.
 

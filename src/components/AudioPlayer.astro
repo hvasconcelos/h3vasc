@@ -84,10 +84,11 @@ import { backgroundTrack } from '../data/music'
     for by play/pause, so the credit rides on hover instead of a second
     button.
 
-    Hover alone would strand keyboard and touch users, so `focusin` on the
-    wrapper opens it too. That covers both: tabbing to the button reveals the
-    panel and the next Tab lands in the Spotify link, and a tap on touch (where
-    there is no hover) focuses the button and does the same.
+    Hover alone would strand keyboard and touch users, so there are two more
+    ways in: `focusin` on the wrapper, which means tabbing to the button
+    reveals the panel and the next Tab lands in the Spotify link; and a tap,
+    which sticks it open until dismissed. Touch cannot rely on either hover or
+    focus — see the `stuck` flag in the script for why.
 
     `hidden` rather than an opacity utility: the attribute takes that link out
     of the tab order while closed, where an invisible-but-focusable link is a
@@ -275,19 +276,37 @@ import { backgroundTrack } from '../data/music'
 
   if (panel && group) {
     /*
-     * Hover and focus are tracked separately and the panel closes only when
-     * neither holds. Collapsing them into one flag is how these end up
-     * flickering: moving the mouse from the button into the panel fires
-     * pointerleave on the button, and tabbing into the Spotify link fires
-     * focusout on it, and in both cases the panel must stay put.
+     * Three reasons the panel may be open, tracked separately: the pointer is
+     * over it, focus is inside it, or a tap stuck it open. It closes only when
+     * none holds. Collapsing them is how these end up flickering — moving the
+     * mouse from the button into the panel fires pointerleave on the button,
+     * and tabbing into the Spotify link fires focusout on it, and in both
+     * cases the panel must stay put.
      */
+
+    /**
+     * Held open by a tap until something dismisses it. Touch needs this
+     * because a touch pointer stops existing when the finger lifts: the spec
+     * has the browser fire pointerleave immediately after pointerup, so the
+     * hover path alone would open the panel and shut it again within
+     * milliseconds. Focus does not save it either — iOS Safari does not focus
+     * a <button> on tap, so the focus branch below never fires there.
+     */
+    let stuck = false
+
     const open = () => {
       panel.hidden = false
     }
 
-    /** Closes unless the other of the two reasons to stay open still holds. */
+    /** Closes unless any of the three reasons to stay open still holds. */
     const close = (focusStaysInside: boolean) => {
-      if (focusStaysInside || group.matches(':hover')) return
+      if (stuck || focusStaysInside || group.matches(':hover')) return
+      panel.hidden = true
+    }
+
+    /** The one dismissal path, so `stuck` is never left set behind a hidden panel. */
+    const dismiss = () => {
+      stuck = false
       panel.hidden = true
     }
 
@@ -296,6 +315,25 @@ import { backgroundTrack } from '../data/music'
     group.addEventListener('pointerleave', () =>
       close(group.contains(document.activeElement))
     )
+
+    /*
+     * The touch path. Only touch pointers stick: a mouse keeps the pure hover
+     * behaviour, so nothing changes on the desktop. The tap still plays or
+     * pauses — this rides along with that rather than replacing it, so one tap
+     * starts the music and shows what it is.
+     */
+    group.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'touch') return
+      stuck = true
+      open()
+    })
+
+    // Dismiss. Taps inside the group are excluded so the Spotify link still
+    // works and the play/pause button does not close the panel it just opened.
+    document.addEventListener('pointerdown', (event) => {
+      if (!stuck || group.contains(event.target as Node)) return
+      dismiss()
+    })
 
     // focusin/focusout rather than focus/blur: those do not bubble, and the
     // link inside the panel has to count as "focus is still in here".
@@ -310,7 +348,21 @@ import { backgroundTrack } from '../data/music'
 
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape' || panel.hidden) return
-      panel.hidden = true
+      dismiss()
     })
+
+    /*
+     * Scrolling dismisses it as well. The panel is anchored to a header that
+     * scrolls off the top, so leaving it open would park a floating credit
+     * over the page. passive: true — this must never block a scroll.
+     */
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (panel.hidden) return
+        dismiss()
+      },
+      { passive: true }
+    )
   }
 </script>
