@@ -35,7 +35,21 @@ const personId = `${site}#helder-vasconcelos`
       content="ai, software engineer, llm , agentic, open source"
     />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/*
+      The whole icon set is cut from public/avatar.jpg by scripts/generate-icons.mjs.
+      No SVG icon on purpose: browsers prefer image/svg+xml over everything
+      else here, so one would quietly win over the photo.
+    */}
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link
+      rel="icon"
+      href="/favicon-96x96.png"
+      type="image/png"
+      sizes="96x96"
+    />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     {/*
       The Markdown twin of this page, generated from the same src/data modules.
@@ -65,7 +79,7 @@ const personId = `${site}#helder-vasconcelos`
     </script>
 
     <meta property="og:type" content="profile" />
-    <meta property="og:site_name" content="Hélder Vasconcelos" />
+    <meta property="og:site_name" content="Hélder Vasconcelos - Personal Website" />
     <meta property="og:locale" content="en_GB" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

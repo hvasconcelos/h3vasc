@@ -60,6 +60,20 @@ server {
         add_header Access-Control-Allow-Origin "*" always;
     }
 
+    # Same gap as /index.md above: nginx's bundled mime.types has no entry for
+    # .webmanifest, and Chrome refuses a manifest served as octet-stream.
+    location = /site.webmanifest {
+        types { }
+        default_type "application/manifest+json";
+    }
+
+    # The icon set is regenerated only when the avatar changes, and the names
+    # are not fingerprinted, so this is a day rather than a year.
+    location ~* ^/(favicon\.ico|favicon-96x96\.png|apple-touch-icon\.png|icon-(192|512)\.png)$ {
+        access_log off;
+        add_header Cache-Control "public, max-age=86400" always;
+    }
+
     location / {
         try_files $uri $uri/ $uri.html =404;
     }
