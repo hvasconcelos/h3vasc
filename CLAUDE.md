@@ -136,11 +136,18 @@ Every icon is cut from `public/avatar.jpg` by `scripts/generate-icons.mjs` (`npm
 | `apple-touch-icon.png` | 180 | iOS home screen |
 | `icon-192.png`, `icon-512.png` | 192, 512 | Android home screen, install prompt, via `site.webmanifest` |
 
-Three things about that script are load-bearing:
+The photo is not used as-is. It is reduced to **two tones** — `LIGHT` (`#f7f7f4`) and `DARK` (`#26251e`), the two ends of the ramp — and ordered-dithered, so it reads as a grayscale halftone rather than as a colour headshot. That keeps a photographic icon inside the site's grayscale-only rule.
 
-- **The `CROP` constant.** The source is a 1024×1024 headshot sitting in a lot of empty backdrop; scaled whole to 16px it is a grey smudge. Every output is cut from a square around the head first. Adjust `CROP` if the avatar is ever reshot — do not drop it.
+Four things about that script are load-bearing:
+
+- **The dither is applied once, to a single master.** `renderMaster()` builds one 512px two-tone image and every output is downscaled from it. The halftone is then visible at 180px and up and averages back into smooth grey below. Dithering each size separately instead turns 16px and 32px into unreadable noise — that is the whole reason for the master.
+- **The `CROP` constant.** The source is a 1024×1024 headshot sitting in a lot of empty backdrop; scaled whole to 16px it is a grey smudge. Everything is cut from a square around the head first. Adjust `CROP` if the avatar is ever reshot — do not drop it.
+- **`DOT` and `CONTRAST`.** `DOT = 2` scales one Bayer cell to 2px in the master, putting the dot pitch at an effective 256 — coarse enough to still read as halftone at 180px, fine enough to keep the face. `CONTRAST = 1.4` lifts photographic mid-tones that would otherwise collapse into the backdrop under a two-tone reduction. Both were tuned by eye against the rendered set; re-check the small sizes if you change either.
 - **The hand-rolled ICO.** sharp cannot write ICO, so the script packs PNGs into the container itself (6-byte header, one 16-byte directory entry per image, then the payloads verbatim). This is the format's documented post-Vista PNG mode, not a trick.
-- **`flatten()` on the touch icon.** iOS backs a transparent icon with black. Everything is rendered opaque over the dark page colour.
+
+The Bayer matrix is ordered rather than error-diffused on purpose: the regular weave survives downscaling as an even grey, where Floyd–Steinberg's noise goes blotchy.
+
+When previewing output, note that **chained `.resize()` calls in one sharp pipeline collapse to the last one** — `sharp(f).resize(16,16).resize(160,160)` renders at 160, not a magnified 16. Small-size checks need two separate pipelines.
 
 There is deliberately **no SVG favicon** — browsers prefer `image/svg+xml` over every other `rel="icon"`, so one would silently beat the photo. The old `h` glyph at `public/favicon.svg` was removed for exactly that reason; do not reinstate it without also dropping the PNGs.
 
