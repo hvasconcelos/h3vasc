@@ -9,6 +9,7 @@ import { experienceData } from '../data/experience'
 import { musicProjects } from '../data/music'
 import { projects } from '../data/projects'
 import { socialLinks, sourceRepo } from '../data/social'
+import { talks } from '../data/talks'
 import { blogPosts } from '../data/writing'
 
 const year = new Date().getFullYear()
@@ -112,6 +113,52 @@ const year = new Date().getFullYear()
               </a>
             </li>
           ))
+        }
+      </ul>
+    </CollapsibleSection>
+
+    {/* Recent Talks Section */}
+    <CollapsibleSection id="talks" title="Recent Talks">
+      <ul class="space-y-6">
+        {
+          talks.map((talk) => {
+            {/* Only a talk with slides or a recording becomes a link. */}
+            const Wrapper = talk.url ? 'a' : 'div'
+            return (
+              <li>
+                <Wrapper
+                  href={talk.url}
+                  target={talk.url ? '_blank' : undefined}
+                  rel={talk.url ? 'noopener noreferrer' : undefined}
+                  class={talk.url ? 'group block' : 'block'}
+                >
+                  {/*
+                    The hover tint is the affordance for "this is clickable", so
+                    it is only worth having on the ones that are.
+                  */}
+                  <h3
+                    class:list={[
+                      'mb-1 text-gray-900',
+                      talk.url && 'transition-colors group-hover:text-gray-600',
+                    ]}
+                  >
+                    {talk.title}
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span class="font-mono text-xs text-gray-500">
+                      {talk.event}
+                    </span>
+                    <span class="font-mono text-xs text-gray-400" aria-hidden="true">
+                      ·
+                    </span>
+                    <time class="font-mono text-xs text-gray-500">
+                      {talk.date}
+                    </time>
+                  </div>
+                </Wrapper>
+              </li>
+            )
+          })
         }
       </ul>
     </CollapsibleSection>

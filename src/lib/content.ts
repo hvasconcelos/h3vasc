@@ -12,6 +12,7 @@ import { experienceData } from '../data/experience'
 import { musicProjects } from '../data/music'
 import { projects } from '../data/projects'
 import { socialLinks, sourceRepo } from '../data/social'
+import { talks } from '../data/talks'
 import { blogPosts } from '../data/writing'
 
 export const NAME = 'Hélder Vasconcelos'
@@ -79,6 +80,14 @@ export function renderSiteMarkdown(origin: string): string {
       '## Writing',
       blogPosts
         .map((post) => `- [${post.title}](${post.url}) — ${post.date}`)
+        .join('\n'),
+
+      '## Recent Talks',
+      talks
+        .map((talk) => {
+          const title = talk.url ? `[${talk.title}](${talk.url})` : talk.title
+          return `- ${title} — ${talk.event}, ${talk.date}`
+        })
         .join('\n'),
 
       '## Music',
