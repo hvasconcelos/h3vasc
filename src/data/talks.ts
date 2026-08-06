@@ -21,7 +21,7 @@ export const talks: Talk[] = [
   },
   {
     title: 'Agentic Shift, How AI Transformed Engineering at LayerX',
-    event: 'Swords Health Office',
+    event: 'Sword Health Office',
     date: 'February 2026',
   },
   {
