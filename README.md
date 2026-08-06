@@ -24,7 +24,7 @@ Open <http://localhost:4321>.
 ## Project layout
 
 ```
-h3vasc-web/
+hvasc-web/
 ├── src/
 │   ├── pages/
 │   │   ├── index.astro          # The whole site
@@ -95,8 +95,8 @@ Both themes use a warm neutral ramp derived from Cursor's palette. `:root[data-t
 Build the image and run it anywhere a container runs:
 
 ```bash
-docker build -t h3vasc-web .
-docker run --rm -p 8080:8080 h3vasc-web
+docker build -t hvasc-web .
+docker run --rm -p 8080:8080 hvasc-web
 ```
 
 Open <http://localhost:8080>.
@@ -106,7 +106,7 @@ The image is a two-stage build — Node compiles the site, then nginx (Alpine) s
 `PORT` is overridable for hosts that assign one:
 
 ```bash
-docker run --rm -e PORT=3000 -p 3000:3000 h3vasc-web
+docker run --rm -e PORT=3000 -p 3000:3000 hvasc-web
 ```
 
 ## Deploying

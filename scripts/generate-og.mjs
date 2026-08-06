@@ -13,12 +13,12 @@ import { readFileSync } from 'node:fs'
 const WIDTH = 1200
 const HEIGHT = 630
 
-const PROMPT_HOST = 'helder@h3vasc'
+const PROMPT_HOST = 'helder@hvasc'
 const PROMPT_CMD = '$ whoami'
 const NAME = 'Hélder Vasconcelos'
 const ROLE = 'Chief Technology Officer at LayerX'
 const FOCUS = ['agentic workflows', 'llm inference', 'high performance systems']
-const SITE = 'h3vasc.com'
+const SITE = 'hvasc.dev'
 const LOCATION = 'Porto, Portugal'
 
 // Same values as the site's dark theme in global.css.

@@ -25,7 +25,7 @@ const externalLinks = {
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://h3vasc.com',
+  site: 'https://hvasc.dev',
   // Fully static output — the built site in dist/ is plain HTML/CSS/JS.
   output: 'static',
   markdown: {

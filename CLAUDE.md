@@ -18,7 +18,7 @@ The site was migrated from Next.js 14 (App Router) to Astro 7. There is no React
 ## Project Structure
 
 ```
-h3vasc-web/
+hvasc-web/
 ├── src/
 │   ├── pages/
 │   │   ├── index.astro          # The entire site
@@ -139,8 +139,8 @@ Use `gray-*` utilities and nothing else.
 **Docker** — two-stage build (`node:22-alpine` → `nginx:1.29-alpine`):
 
 ```bash
-docker build -t h3vasc-web .
-docker run --rm -p 8080:8080 h3vasc-web
+docker build -t hvasc-web .
+docker run --rm -p 8080:8080 hvasc-web
 ```
 
 nginx config lives in `nginx.conf.template` and is rendered by the official image's envsubst entrypoint at startup, so `PORT` is overridable. If you edit that file, remember `${PORT}` is substituted but nginx runtime variables like `$uri` are not.
