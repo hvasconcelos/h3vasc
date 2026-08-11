@@ -6,8 +6,8 @@ import { renderSiteMarkdown } from '../lib/content'
  * would otherwise strip tags off the HTML can read this instead, and the site
  * links to it from <link rel="alternate" type="text/markdown">.
  */
-export const GET: APIRoute = ({ site }) =>
-  new Response(renderSiteMarkdown(site?.origin ?? ''), {
+export const GET: APIRoute = async ({ site }) =>
+  new Response(await renderSiteMarkdown(site?.origin ?? ''), {
     headers: {
       // charset is explicit: the content carries accented characters.
       'Content-Type': 'text/markdown; charset=utf-8',

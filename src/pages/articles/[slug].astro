@@ -1,0 +1,105 @@
+---
+import { render } from 'astro:content'
+import type { InferGetStaticPropsType } from 'astro'
+import Layout from '../../layouts/Layout.astro'
+import ThemeToggle from '../../components/ThemeToggle.astro'
+import { formatArticleDate, getArticles, isoDate } from '../../lib/articles'
+
+export async function getStaticPaths() {
+  const articles = await getArticles()
+  return articles.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }))
+}
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>
+
+const { article } = Astro.props
+// Renders through the Sätteri processor configured in astro.config.mjs, so the
+// externalLinks plugin gives outbound links target="_blank" here too.
+const { Content } = await render(article.entry)
+---
+
+<Layout
+  title={`${article.title} — Hélder Vasconcelos`}
+  description={article.description}
+  markdown={article.markdownHref}
+  article={{ date: article.date, tags: article.tags }}
+>
+  {/*
+    Wider than the homepage's max-w-2xl. That column is sized for a stack of
+    short blocks; a long article at the same width is a very tall thin ribbon,
+    and JetBrains Mono sets wide enough that the extra room buys real lines
+    rather than a slacker measure.
+  */}
+  <main class="mx-auto min-h-screen max-w-3xl px-6 py-24">
+    <div class="mb-10 flex items-center justify-between gap-4">
+      <a
+        href="/"
+        class="font-mono text-xs text-gray-500 transition-colors hover:text-gray-900"
+      >
+        &lt; back
+      </a>
+      <ThemeToggle />
+    </div>
+
+    <header class="mb-10">
+      <p class="mb-4 font-mono text-xs text-gray-500">
+        <span class="text-accent">helder@hvasc</span>:<span class="text-gray-400"
+          >~/articles</span
+        >$ cat {article.slug}.md
+      </p>
+      {/*
+        Same rank as the name on the homepage, and set at the same size: this
+        is the page's subject, and an article that opens smaller than the h1 of
+        a profile page reads as the lesser of the two.
+      */}
+      <h1
+        class="mb-4 text-3xl font-medium tracking-tight text-balance text-gray-900 sm:text-4xl"
+      >
+        {article.title}
+      </h1>
+      {/* A step above the metadata elsewhere on the site — here it is the only
+          thing between the title and the body, so it carries the byline. */}
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <time
+          datetime={isoDate(article.date)}
+          class="font-mono text-sm text-gray-500"
+        >
+          {formatArticleDate(article.date)}
+        </time>
+        {
+          article.tags.map((tag) => (
+            <span class="font-mono text-sm text-gray-500">[{tag}]</span>
+          ))
+        }
+      </div>
+    </header>
+
+    <article class="prose">
+      <Content />
+    </article>
+
+    <footer class="mt-16 border-t border-gray-200 pt-6">
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <a
+          href="/"
+          class="font-mono text-xs text-gray-500 transition-colors hover:text-gray-900"
+        >
+          &lt; back home
+        </a>
+        {/*
+          The Markdown twin is in <link rel="alternate"> and in the Link header
+          already; this is the one place a person rather than an agent can find it.
+        */}
+        <a
+          href={article.markdownHref}
+          class="font-mono text-xs text-gray-500 transition-colors hover:text-gray-900"
+        >
+          [read as markdown]
+        </a>
+      </div>
+    </footer>
+  </main>
+</Layout>

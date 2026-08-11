@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import AudioPlayer from '../components/AudioPlayer.astro'
 import CollapsibleSection from '../components/CollapsibleSection.astro'
 import SocialIcon from '../components/SocialIcon.astro'
 import ThemeToggle from '../components/ThemeToggle.astro'
@@ -11,9 +10,13 @@ import { musicProjects } from '../data/music'
 import { projects } from '../data/projects'
 import { socialLinks, sourceRepo } from '../data/social'
 import { talks } from '../data/talks'
-import { blogPosts } from '../data/writing'
+import { writingEntries } from '../lib/articles'
 
 const year = new Date().getFullYear()
+
+// Self-hosted articles first, then the posts on other people's domains. The
+// Markdown twins render from this same list, so the two cannot disagree.
+const writing = await writingEntries()
 ---
 
 <Layout
@@ -55,16 +58,7 @@ const year = new Date().getFullYear()
           <p class="font-mono text-sm text-gray-500">Porto, Portugal 🇵🇹</p>
         </div>
       </div>
-      {/*
-        Homepage only — 404 shares the Layout but not this header, so no music
-        plays there. The music toggle comes first, which makes it the first
-        focusable element on the page: WCAG 1.4.2 wants the stop control for
-        auto-playing audio reachable at the very beginning.
-      */}
-      <div class="flex shrink-0 items-center gap-2">
-        <AudioPlayer />
-        <ThemeToggle />
-      </div>
+      <ThemeToggle />
     </header>
 
     {/* Bio Section */}
@@ -110,7 +104,7 @@ const year = new Date().getFullYear()
     <CollapsibleSection id="writing" title="Writing">
       <ul class="space-y-6">
         {
-          blogPosts.map((post) => (
+          writing.map((post) => (
             <li>
               <a
                 href={post.url}

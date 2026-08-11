@@ -1,4 +1,4 @@
-# Both maps below are http-context directives. This file is rendered into
+# The three maps below are http-context directives. This file is rendered into
 # /etc/nginx/conf.d/, which the stock nginx.conf includes inside http {}, so
 # they belong here — above the server block, not in it.
 
@@ -12,14 +12,29 @@ map $http_accept $homepage {
     "~*text/markdown"  /index.md;
 }
 
+# The same question for an article, which cannot be answered with a fixed path:
+# there is one page per file. This yields the suffix instead, and the article
+# location below appends it to the URI it already has.
+map $http_accept $md_suffix {
+    default            '';
+    "~*text/markdown"  .md;
+}
+
 # Link headers (RFC 8288), so the alternate representation, the sitemap and the
 # agent index are all discoverable from a HEAD request. The same three are in
 # <head>, but finding them there means fetching and parsing the HTML first.
 # Relative references on purpose: they resolve against the request URI, which
 # keeps the domain in astro.config.mjs and nowhere else.
+#
+# Articles are deliberately *not* here. Their alternate is their own twin
+# rather than /index.md, so the value needs the slug — and a map's value is
+# expanded lazily, at add_header time, long after location matching has run its
+# own regexes. Rather than reason about whose captures $1 refers to by then,
+# the two article locations below build the header inline from $uri and from a
+# named capture on the location itself, which are unambiguous.
 map $uri $agent_link {
     default    '';
-    ~\.html$   '</index.md>; rel="alternate"; type="text/markdown", </sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby"';
+    ~\.html$   '</index.md>; rel="alternate"; type="text/markdown", </sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby", </rss.xml>; rel="alternate"; type="application/rss+xml"';
     /index.md  '</>; rel="alternate"; type="text/html", </sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby"';
 }
 
@@ -60,8 +75,11 @@ server {
         text/plain
         text/css
         text/javascript
+        text/markdown
+        text/xml
         application/javascript
         application/json
+        application/rss+xml
         image/svg+xml;
 
     # Astro fingerprints everything under /_astro/, so it can be cached forever.
@@ -120,11 +138,60 @@ server {
         add_header Access-Control-Allow-Origin "*" always;
     }
 
+    # Articles answer to Accept the way the homepage does, but there is one
+    # page per file, so the target is built from the URI rather than picked
+    # from a map. `if` is safe here — rewrite is one of the two directives that
+    # behave inside it — and $md_suffix is empty for everyone but an agent, so
+    # the common path falls straight through to try_files below. `last` re-runs
+    # location matching and lands in the .md block, which is what types it.
+    location ~ ^/articles/[^/.]+$ {
+        if ($md_suffix) {
+            rewrite ^ $uri$md_suffix last;
+        }
+
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        # $uri is this article's own path, so the twin is one suffix away and
+        # no capture is needed.
+        add_header Link '<$uri.md>; rel="alternate"; type="text/markdown", </sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby", </rss.xml>; rel="alternate"; type="application/rss+xml"' always;
+        add_header Cache-Control "no-cache" always;
+        # Two representations behind one URL, so a cache must key on Accept.
+        add_header Vary "Accept" always;
+
+        try_files $uri $uri.html =404;
+    }
+
+    # The articles' Markdown twins, with the same .md gap in nginx's bundled
+    # mime.types that /index.md works around above. No Vary here: this URL has
+    # only ever been Markdown, and the negotiation lives on the page's URL.
+    #
+    # The slug is a named capture on the location, which nginx turns into a
+    # variable for the whole request — the one place the page's path can be
+    # reconstructed without stripping the suffix back off $uri.
+    location ~ ^/articles/(?<article_slug>[^/]+)\.md$ {
+        types { }
+        default_type "text/markdown; charset=utf-8";
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Link '</articles/$article_slug>; rel="alternate"; type="text/html", </sitemap.xml>; rel="sitemap", </llms.txt>; rel="describedby", </rss.xml>; rel="alternate"; type="application/rss+xml"' always;
+        add_header Cache-Control "no-cache" always;
+        add_header Access-Control-Allow-Origin "*" always;
+    }
+
     # Same gap as /index.md above: nginx's bundled mime.types has no entry for
     # .webmanifest, and Chrome refuses a manifest served as octet-stream.
     location = /site.webmanifest {
         types { }
         default_type "application/manifest+json";
+    }
+
+    # mime.types would call this text/xml, which readers tolerate by sniffing
+    # the root element. Naming it properly costs one block.
+    location = /rss.xml {
+        types { }
+        default_type "application/rss+xml";
     }
 
     # The icon set is regenerated only when the avatar changes, and the names
@@ -135,19 +202,6 @@ server {
         add_header X-Frame-Options "SAMEORIGIN" always;
         add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header Cache-Control "public, max-age=86400" always;
-    }
-
-    # The background loop is copied verbatim out of public/, so the name is not
-    # fingerprinted — a month rather than a year, like the icon set above.
-    # mime.types already maps .mp3 to audio/mpeg and .ogg to audio/ogg, so only
-    # the caching is missing here. Deliberately absent from gzip_types: both
-    # formats are already compressed and re-compressing them only burns CPU.
-    location ~* \.(mp3|ogg)$ {
-        access_log off;
-        add_header X-Content-Type-Options "nosniff" always;
-        add_header X-Frame-Options "SAMEORIGIN" always;
-        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-        add_header Cache-Control "public, max-age=2592000" always;
     }
 
     location / {

@@ -4,13 +4,6 @@
    script in Layout.astro stamps on <html> before first paint. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
-/* Enables `sound-on:` utilities, driven by the data-music attribute the
-   AudioPlayer script stamps on <html>. Unlike `dark` above there is no
-   pre-paint script behind this one, and deliberately so: at first paint
-   nothing is playing yet whatever localStorage says, because the browser has
-   not ruled on autoplay. "Off" is the only honest initial render. */
-@custom-variant sound-on (&:where([data-music='on'], [data-music='on'] *));
-
 /*
  * Tailwind v4 is configured in CSS. This block replaces the old
  * tailwind.config.ts.
@@ -36,6 +29,8 @@
   --text-sm--line-height: calc(1.25 / 0.8125);
   --text-base: 0.9375rem; /* 15px */
   --text-base--line-height: calc(1.5 / 0.9375);
+  --text-lg: 1.0625rem; /* 17px — article headings, the one step above body */
+  --text-lg--line-height: calc(1.5 / 1.0625);
   --text-3xl: 1.625rem; /* 26px */
   --text-3xl--line-height: calc(2 / 1.625);
   --text-4xl: 2rem; /* 32px */
@@ -55,7 +50,7 @@
      rather than a hue. */
   --color-accent: #26251e;
 
-  /* Phosphor green, for the blinking block caret. */
+  /* Phosphor green. The blinking block caret and nothing else. */
   --color-terminal: #0f7d45;
 
   /* Section labels. Green reads as a terminal on the dark page, but on the
@@ -129,6 +124,241 @@
 
 @utility text-balance {
   text-wrap: balance;
+}
+
+/*
+ * Scoreboards inside an article: an inline SVG bar chart, styled from here
+ * rather than from a <style> block in the Markdown so the figure itself stays
+ * legible in the source.
+ *
+ * Inline rather than an <img> on purpose. Every colour below resolves through
+ * the gray scale, so the chart follows the theme toggle. An external SVG can't:
+ * it gets no access to the document's custom properties, and the site's theme
+ * is a data-theme attribute rather than prefers-color-scheme, so the media
+ * query trick doesn't reach it either.
+ */
+@utility scoreboard {
+  /* Fixed intrinsic width with a scroll, not a shrink-to-fit: at phone width a
+     scaled-down viewBox would render the labels at about 5px. */
+  margin-block: 2rem;
+  overflow-x: auto;
+
+  & svg {
+    display: block;
+    min-width: 34rem;
+    width: 100%;
+  }
+
+  & text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  & .sb-title {
+    fill: var(--color-gray-900);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  & .sb-source,
+  & .sb-tag {
+    fill: var(--color-gray-500);
+    font-size: 10px;
+  }
+
+  & .sb-rule {
+    stroke: var(--color-gray-200);
+    stroke-width: 1;
+  }
+
+  & .sb-label {
+    fill: var(--color-gray-700);
+  }
+
+  & .sb-value {
+    fill: var(--color-gray-900);
+  }
+
+  /* The track is what makes a four-cent bar visible as a near-empty row rather
+     than as a rendering failure. */
+  & .sb-track {
+    fill: var(--color-gray-100);
+  }
+
+  & .sb-bar {
+    fill: var(--color-gray-600);
+  }
+
+  & figcaption {
+    color: var(--color-gray-500);
+    font-size: var(--text-xs);
+    line-height: 1.6;
+    margin-top: 0.75rem;
+  }
+}
+
+/*
+ * Long-form article body. The homepage's prose (the bio) is a single block
+ * styled with inline arbitrary variants; an article has headings, lists and
+ * code, which is more than that idiom can carry legibly.
+ *
+ * Every colour resolves through the gray scale, so this themes with the rest of
+ * the site and needs no `dark:` anywhere. Size is inherited from body (15px):
+ * JetBrains Mono at that size is already generous for a measure this narrow.
+ */
+@utility prose {
+  color: var(--color-gray-700);
+  line-height: 1.75;
+  /* A URL or an identifier longer than the column would otherwise push the
+     page sideways — mono type makes those wider than they look. */
+  overflow-wrap: break-word;
+
+  & > :first-child {
+    margin-top: 0;
+  }
+
+  & p {
+    margin-bottom: 1.25rem;
+  }
+
+  /*
+   * Headings carry their weight typographically — a size step, a weight step
+   * and the space above them — rather than with a marker glyph. An earlier
+   * revision prefixed them with `## ` from a ::before; it read as unrendered
+   * Markdown, and generated content lands inside a selection, so copying a
+   * heading took the hashes with it. Do not reinstate it.
+   */
+  & h2,
+  & h3 {
+    color: var(--color-gray-900);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    text-wrap: pretty;
+    /* The Markdown processor gives every heading an id, so any of them can be
+       deep-linked; without this the target lands flush against the viewport. */
+    scroll-margin-top: 2rem;
+  }
+
+  /* Asymmetric on purpose: a heading belongs to what follows it, so the gap
+     above is the one that separates sections. */
+  & h2 {
+    font-size: var(--text-lg);
+    margin-top: 3rem;
+    margin-bottom: 0.875rem;
+  }
+
+  & h3 {
+    font-size: var(--text-base);
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  & strong {
+    color: var(--color-gray-900);
+    font-weight: 600;
+  }
+
+  & em {
+    font-style: italic;
+  }
+
+  & a {
+    color: var(--color-accent);
+    border-bottom: 1px solid var(--color-gray-300);
+    transition: border-color 0.15s ease, opacity 0.15s ease;
+  }
+
+  & a:hover {
+    border-color: var(--color-accent);
+    opacity: 0.7;
+  }
+
+  & ul,
+  & ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.25rem;
+  }
+
+  & ul {
+    list-style: disc;
+  }
+
+  & ol {
+    list-style: decimal;
+  }
+
+  & li {
+    margin-bottom: 0.5rem;
+  }
+
+  & li::marker {
+    color: var(--color-gray-400);
+  }
+
+  & blockquote {
+    border-left: 2px solid var(--color-gray-300);
+    color: var(--color-gray-600);
+    font-style: italic;
+    margin-bottom: 1.25rem;
+    padding-left: 1rem;
+  }
+
+  & code {
+    background-color: var(--color-gray-100);
+    border-radius: 0.25rem;
+    color: var(--color-gray-900);
+    font-size: 0.9em;
+    padding: 0.1em 0.3em;
+  }
+
+  & pre {
+    background-color: var(--color-gray-100);
+    border-radius: 0.375rem;
+    margin-bottom: 1.25rem;
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  /* Inside a block the background and padding belong to the <pre>. */
+  & pre code {
+    background-color: transparent;
+    font-size: var(--text-sm);
+    padding: 0;
+  }
+
+  & hr {
+    border-color: var(--color-gray-200);
+    margin-block: 2.5rem;
+  }
+
+  & img {
+    height: auto;
+    max-width: 100%;
+  }
+
+  /* A table wider than the column scrolls inside its own wrapper rather than
+     taking the page with it. */
+  & table {
+    border-collapse: collapse;
+    display: block;
+    margin-bottom: 1.25rem;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  & th,
+  & td {
+    border-bottom: 1px solid var(--color-gray-200);
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  & th {
+    color: var(--color-gray-900);
+    font-weight: 500;
+  }
 }
 
 /* Block caret that trails the name, as a terminal would leave it. */

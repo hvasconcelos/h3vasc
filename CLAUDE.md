@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Minimal, grayscale personal website for Helder Vasconcelos, CTO at LayerX. A single-page static site built with Astro and deployed to Vercel, or as a container via the included Dockerfile.
+Minimal, grayscale personal website for Helder Vasconcelos, CTO at LayerX. One page plus a self-hosted article per file in `articles/`; a static site built with Astro and deployed to Vercel, or as a container via the included Dockerfile.
 
 The site was migrated from Next.js 14 (App Router) to Astro 7. There is no React left in the project — do not reintroduce it. Components are `.astro`; interactivity is plain TypeScript in `<script>` tags.
 
@@ -19,22 +19,29 @@ The site was migrated from Next.js 14 (App Router) to Astro 7. There is no React
 
 ```
 hvasc-web/
+├── articles/                    # Self-hosted writing, one Markdown file each
+│   └── YYYYMMDD_some_title.md
 ├── src/
 │   ├── pages/
-│   │   ├── index.astro          # The entire site
+│   │   ├── index.astro          # The homepage — every section of it
 │   │   ├── 404.astro
-│   │   ├── index.md.ts          # /index.md — the Markdown twin
+│   │   ├── articles/
+│   │   │   ├── [slug].astro     # /articles/<slug> — one article
+│   │   │   └── [slug].md.ts     # /articles/<slug>.md — its Markdown twin
+│   │   ├── index.md.ts          # /index.md — the homepage's Markdown twin
 │   │   ├── llms.txt.ts          # /llms.txt — index for agents
+│   │   ├── llms-full.txt.ts     # /llms-full.txt — profile + every article
+│   │   ├── rss.xml.ts           # /rss.xml — feed, self-hosted articles only
 │   │   ├── robots.txt.ts        # /robots.txt
 │   │   └── sitemap.xml.ts       # /sitemap.xml
 │   ├── layouts/
 │   │   └── Layout.astro         # <head>, font imports, metadata, JSON-LD
 │   ├── components/
-│   │   ├── AudioPlayer.astro
 │   │   ├── CollapsibleSection.astro
 │   │   ├── SocialIcon.astro
 │   │   ├── ThemeToggle.astro
 │   │   └── GlitteryBackground.astro
+│   ├── content.config.ts        # The `articles` collection, loaded from ../articles
 │   ├── data/                    # Content lives here, not in markup
 │   │   ├── bio.md
 │   │   ├── experience.ts
@@ -44,11 +51,11 @@ hvasc-web/
 │   │   ├── music.ts
 │   │   └── social.ts
 │   ├── lib/
+│   │   ├── articles.ts          # Slugs, ordering, article Markdown, the Writing merge
 │   │   └── content.ts           # Renders src/data as Markdown
 │   └── styles/
 │       └── global.css
-├── public/                      # avatar.jpg, og.png, the icon set, site.webmanifest,
-│                                #   reaxis-liquid-alchemy-loop.{ogg,mp3}
+├── public/                      # avatar.jpg, og.png, the icon set, site.webmanifest
 ├── astro.config.mjs
 ├── Dockerfile
 ├── nginx.conf.template
@@ -77,9 +84,67 @@ There is no lint script. `npm run check` is the closest equivalent and should pa
 - **Experience** → `src/data/experience.ts` (`Experience[]`)
 - **Side projects** → `src/data/projects.ts` (`Project[]`). Names and descriptions are copied verbatim from GitHub; refresh them with `gh api repos/<owner>/<repo>` rather than paraphrasing. Deliberately no star counts — they would go stale in a static build.
 - **Education** → `src/data/education.ts` (`Education[]`)
-- **Writing** → `src/data/writing.ts` (`BlogPost[]`)
-- **Background track** → `backgroundTrack` in `src/data/music.ts` (`Track`). Metadata for the homepage loop; see Background Music below.
+- **Writing** → `src/data/writing.ts` (`BlogPost[]`) for posts published on *other* people's domains. Self-hosted pieces are files in `articles/` and are never listed here by hand — see Articles below.
+- **Music** → `src/data/music.ts` (`MusicProject[]`). Discography, from Discogs. Read-only credits: there is no player on the site and no audio in `public/`.
 - **Social links** → `src/data/social.ts` (`SocialLink[]`). The `platform` field selects an SVG in `SocialIcon.astro`; adding a new platform means widening the `SocialPlatform` union and adding a branch there.
+
+## Articles
+
+Self-hosted writing. One Markdown file per piece in **`articles/`**, at the repository root rather than under `src/` — that is where the pieces get written, and the glob loader's `base` is happy to reach outside `src/`. Publishing is: add the file, commit, deploy. Nothing else is edited.
+
+Frontmatter is validated by the `articles` collection in `src/content.config.ts`:
+
+```yaml
+---
+title: "The AGI Race Has Two Scoreboards. You Only Need One."
+date: 2026-08-11
+description: "One sentence. It becomes the meta description, the RSS item and the llms.txt entry."
+tags: [ai, llm, inference]
+---
+```
+
+`title`, `date` and `description` are required; `tags` defaults to empty. A `slug` field is accepted and overrides the derived one, but is rarely needed.
+
+**Filenames are `YYYYMMDD_words_here.md`.** The date prefix sorts the folder chronologically on disk and is stripped from the URL; underscores become hyphens. So `20260811_agi_two_scoreboards.md` is served at `/articles/agi-two-scoreboards`.
+
+### src/lib/articles.ts is the only thing that knows these rules
+
+Slug derivation, ordering, the URLs, the standalone Markdown rendering and the merge into the Writing list all live there. The page, the `.md` twin, the feed, the sitemap and `/index.md` every one of them come through it, which is what keeps them from disagreeing. Two functions carry most of that weight:
+
+- `getArticles()` — every article, newest first, each with `slug`, `href` and `markdownHref`.
+- `writingEntries()` — self-hosted articles mapped into the existing `BlogPost` shape and prepended to `src/data/writing.ts`. It is `async`, so `index.astro` and `src/lib/content.ts` both `await` it. **Adding a self-hosted post to `writing.ts` by hand would double it up** — that list is for other people's domains only.
+
+Self-hosted entries reuse the external `date` field, which is a "where, and when" label rather than a date: `hvasc.dev, 2026`. The real date is on the article page.
+
+### The article page
+
+`src/pages/articles/[slug].astro`, one `getStaticPaths` entry per file, rendered through the same Sätteri processor as the bio — so outbound links get `target="_blank"` from the `externalLinks` plugin here too, without any markup saying so.
+
+The column is `max-w-3xl`, one step wider than the `max-w-2xl` every other page uses. That narrower column is sized for a stack of short blocks; a long article at the same width is a very tall thin ribbon.
+
+Body copy is the `prose` utility in `global.css` — a plain CSS block over `p`, `h2`/`h3`, lists, `code`, `blockquote`, tables and links. It reaches only for `--color-gray-*` and `--color-accent`, so it themes with everything else and needs no `dark:`. The bio keeps its own inline `[&_a]:…` chain — it has a justify/hyphens treatment this does not.
+
+Headings carry their weight typographically: one size step (`--text-lg`, 17px, added to the scale for exactly this), weight 600, and a 3rem gap above against 0.875rem below — a heading belongs to what follows it. An earlier revision prefixed them with `## ` from a `::before`. It read as unrendered Markdown, and generated content lands inside a selection, so copying a heading took the hashes with it. **Do not reinstate it.**
+
+### Charts are inline SVG, not images
+
+A scoreboard in an article is a `<figure class="scoreboard">` holding a hand-written `<svg>`, straight in the Markdown. The styling lives in the `scoreboard` utility in `global.css`, keyed on `sb-title` / `sb-source` / `sb-rule` / `sb-label` / `sb-tag` / `sb-track` / `sb-bar` / `sb-value`, so the figure in the source is geometry only.
+
+Inline rather than an `<img>` because every fill resolves through `var(--color-gray-*)` and therefore follows the theme toggle. An external SVG cannot: it gets no access to the document's custom properties, and the site's theme is a `data-theme` attribute rather than `prefers-color-scheme`, so the media-query trick inside the file doesn't reach it either.
+
+Conventions worth keeping: a `640`-wide `viewBox` with 26px rows, labels at `x=0`, the bar track from 208 to 580, values right-aligned at 640. Open-weight models get a `[open]` tag in the site's bracketed idiom rather than a second bar colour. The track behind each bar is what stops a four-cent bar reading as a rendering failure. `role="img"` plus an `aria-label` that states the ranking in words, because a screen reader gets nothing from the bars, and a `<figcaption>` naming the source and its date — the numbers go stale and the caption is what dates them.
+
+The SVG scrolls rather than shrinks below `34rem` (`overflow-x: auto` on the figure, `min-width` on the svg). Scaled to phone width, an 11px label would render at about 5px.
+
+The cost is roughly 120 lines of SVG in the article source, which also lands in the Markdown twin. That is the accepted trade for a chart that themes.
+
+`Layout.astro` takes two optional props for this: `markdown` (which twin `rel="alternate"` points at) and `article` (`{ date, tags }`), which switches `og:type` to `article`, swaps the `profile:*` tags for `article:*`, and replaces the ProfilePage graph with a `BlogPosting`. The author there is a compact `Person` rather than a bare `@id` reference — the full node lives on the homepage, and a consumer parsing one article page cannot resolve an `@id` it has never seen. Same `personId` either way, so they are the same entity to anything that reads both.
+
+### build.format is 'file', and the canonical depends on it
+
+`astro.config.mjs` sets `build: { format: 'file' }`, so an article is `dist/articles/<slug>.html` with its twin at `dist/articles/<slug>.md` beside it, and the URL has no trailing slash. The directory format would produce `<slug>/index.html`, whose `$uri` at the edge is `/articles/<slug>/index.html` — every nginx rule below would have to match that instead.
+
+The cost is that `Astro.url.pathname` carries the `.html` at build time, so **`Layout.astro` strips it before building the canonical URL**. Without that the homepage canonicalises to `/index.html`. In `astro dev` the pathname is already extensionless and the strip is a no-op, which is exactly why it is easy to break without noticing — check `dist/index.html`, not the dev server.
 
 ## Sections and Collapsing
 
@@ -96,48 +161,60 @@ Each page section is a `<CollapsibleSection id title defaultOpen?>` in `index.as
 
 - **Minimal & clean**: white background, grayscale palette only
 - **Typography**: JetBrains Mono throughout. `--font-sans` and `--font-mono` both resolve to it, so existing `font-mono` utilities still read as intent without changing the rendering. Inter remains a dependency but is **not** imported by `Layout.astro`, so it never ships — re-add that import if the site ever moves off an all-mono setting.
-- **Responsive**: content column capped at `max-w-2xl`
+- **Responsive**: content column capped at `max-w-2xl`, except an article page, which is `max-w-3xl` — see Articles
 - **Accessibility**: `aria-label` on icon links, decorative glyphs marked `aria-hidden`
 
 ## Agent-Readable Surface
 
-The site serves its content as Markdown alongside the HTML, so an agent does not have to scrape tags to read it. Five static endpoints are prerendered at build time (`output: 'static'`, so these are plain files in `dist/`):
+The site serves its content as Markdown alongside the HTML, so an agent does not have to scrape tags to read it. Every endpoint below is prerendered at build time (`output: 'static'`, so these are plain files in `dist/`):
 
 | Route | Source | Purpose |
 | --- | --- | --- |
-| `/index.md` | `src/pages/index.md.ts` | The whole page as Markdown |
-| `/llms-full.txt` | `src/pages/llms-full.txt.ts` | The same document under the llms.txt companion name |
-| `/llms.txt` | `src/pages/llms.txt.ts` | [llms.txt](https://llmstxt.org) index pointing at both |
+| `/index.md` | `src/pages/index.md.ts` | The homepage as Markdown |
+| `/articles/<slug>.md` | `src/pages/articles/[slug].md.ts` | One article as Markdown, one file per article |
+| `/llms-full.txt` | `src/pages/llms-full.txt.ts` | The homepage document plus every article in full |
+| `/llms.txt` | `src/pages/llms.txt.ts` | [llms.txt](https://llmstxt.org) index pointing at all of them |
+| `/rss.xml` | `src/pages/rss.xml.ts` | Feed; self-hosted articles only |
 | `/robots.txt` | `src/pages/robots.txt.ts` | Allowlist, explicitly naming AI crawlers |
-| `/sitemap.xml` | `src/pages/sitemap.xml.ts` | Two URLs; hand-rolled to avoid a dependency |
+| `/sitemap.xml` | `src/pages/sitemap.xml.ts` | Page and twin per article; hand-rolled to avoid a dependency |
 
-**All three Markdown outputs are generated by `src/lib/content.ts` from the same `src/data/` modules the page renders from.** Adding a section to `index.astro` means adding it to `renderSiteMarkdown` too, or the twins silently fall behind. Never hand-write content into these endpoints — that is the one way this arrangement breaks.
+**The homepage's Markdown outputs are generated by `src/lib/content.ts` from the same `src/data/` modules the page renders from, and the articles by `src/lib/articles.ts` from the same files the pages render from.** Adding a section to `index.astro` means adding it to `renderSiteMarkdown` too, or the twins silently fall behind. Never hand-write content into these endpoints — that is the one way this arrangement breaks.
 
-`/llms-full.txt` is byte-identical to `/index.md` and stays that way: the site is one page, so "everything in one file" and "the homepage as Markdown" are the same document. Both exist because they answer to different conventions, and an agent that looks for one will not think to try the other. It is served as `text/plain`, not `text/markdown` — the built file is `.txt` and nginx types it from `mime.types` regardless, so matching that keeps dev and production from disagreeing and saves a second `types { }` block.
+`/llms-full.txt` **used to be byte-identical to `/index.md`**, back when the site was one page and "everything in one file" and "the homepage as Markdown" were the same document. Self-hosted articles ended that. It is now the homepage document, a `---`, and every article in full — which is what the convention promises, and what keeps an agent from having to follow a link per article. `/index.md` stays the twin of the page it is named after: a document that *lists* the writing rather than containing it. The shared half is the same `renderSiteMarkdown` call, so the two can still only disagree by way of the data.
 
-The bio is pulled in with `import bioMarkdown from '../data/bio.md?raw'`, so it lands in `/index.md` as its original Markdown rather than round-tripping through HTML.
+`/llms-full.txt` is served as `text/plain`, not `text/markdown` — the built file is `.txt` and nginx types it from `mime.types` regardless, so matching that keeps dev and production from disagreeing and saves a second `types { }` block.
+
+The bio is pulled in with `import bioMarkdown from '../data/bio.md?raw'`, and an article's Markdown is `entry.body` from the content collection, so both land in the twins as their original Markdown rather than round-tripping through HTML.
 
 `Astro.site` supplies the origin in every endpoint (via the `site` prop on `APIRoute`), so the domain is only ever written in `astro.config.mjs`.
 
-`Layout.astro` advertises the twin with `<link rel="alternate" type="text/markdown" href="/index.md">`.
+`Layout.astro` advertises the twin with `<link rel="alternate" type="text/markdown">`, pointing at `/index.md` by default and at the article's own `.md` on an article page (the `markdown` prop). It also advertises `/rss.xml` on every page.
 
-nginx needs help here: its bundled `mime.types` has no `.md` entry, so `nginx.conf.template` has a `location = /index.md` block using the documented `types { }` + `default_type` idiom to force `text/markdown`. Without it the file is served as `application/octet-stream` and clients download it instead of reading it. `/site.webmanifest` has the same gap and the same fix.
+The feed is **self-hosted articles only**. The Writing list also carries posts on other people's domains, and republishing their titles into a feed here would misrepresent where they live and whose feed they belong in.
+
+nginx needs help here: its bundled `mime.types` has no `.md` entry, so `nginx.conf.template` types the Markdown itself with the documented `types { }` + `default_type` idiom — `location = /index.md` for the homepage's twin and `location ~ ^/articles/[^/]+\.md$` for the articles'. Without it the file is served as `application/octet-stream` and clients download it instead of reading it. `/site.webmanifest` has the same gap and the same fix; `/rss.xml` gets a block too, so it is `application/rss+xml` rather than the `text/xml` `mime.types` would give it.
 
 ### Link headers and Accept negotiation
 
 Two things live in `nginx.conf.template` rather than the markup, because a `<head>` is only reachable by fetching and parsing the HTML first.
 
-**`Link` headers (RFC 8288)** surface the same three relations a `HEAD` request can see: `rel="alternate"` to the other representation, `rel="sitemap"`, and `rel="describedby"` to `/llms.txt`. Built by the `$agent_link` map, which is keyed on `$uri` and yields an empty string for anything that is not a page — `add_header` omits a header whose value is empty, so assets are untouched. Vercel gets the same headers from the `headers` block in `vercel.json`, spelled out per route because Vercel has no equivalent of a map.
+**`Link` headers (RFC 8288)** surface the relations a `HEAD` request can see: `rel="alternate"` to the other representation, `rel="sitemap"`, `rel="describedby"` to `/llms.txt`, and on pages `rel="alternate"` to the feed. Built by the `$agent_link` map, which is keyed on `$uri` and yields an empty string for anything that is not a page — `add_header` omits a header whose value is empty, so assets are untouched. Vercel gets the same headers from the `headers` block in `vercel.json`, spelled out per route because Vercel has no equivalent of a map.
+
+**Articles are deliberately not in that map.** Their alternate is *their own* twin rather than `/index.md`, so the value needs the slug — and a map's value is expanded lazily, at `add_header` time, long after location matching has run its own regexes over the same request. Rather than reason about whose captures `$1` refers to by then, the two article locations build the header inline: the page location from `$uri` (the twin is one suffix away), the `.md` location from `(?<article_slug>…)`, a **named capture on the location itself**, which nginx turns into a request-scoped variable. Both are unambiguous in a way a positional capture across two regexes is not.
 
 **`Accept: text/markdown` on `/`** returns the Markdown twin. The `$homepage` map picks the file and `location = /` reaches it with `rewrite ^ $homepage last` — `last` re-runs location matching, which is the whole point: it lands in `location = /index.md` and picks up that block's `text/markdown` type. `try_files` would serve the file from `location = /` instead and nginx would type it from `mime.types`, which is exactly the `.md` gap above. Both representations send `Vary: Accept`.
 
+**Articles negotiate the same way**, but there is one page per file, so no map can name the target. The `$md_suffix` map yields `.md` or nothing, and `location ~ ^/articles/[^/.]+$` appends it: `if ($md_suffix) { rewrite ^ $uri$md_suffix last; }`. `if` is safe here — `rewrite` is one of the two directives that behave inside it — and the suffix is empty for every non-agent request, so the common path falls straight through to `try_files`. The rewrite target matches the `.md` location, a different one, so there is no loop.
+
 The regex ignores q-values because nginx cannot parse them, so a client that mentions `text/markdown` at all is taken to want it. No browser does — the `Accept` Chrome and Safari send has no Markdown in it.
 
-**This is nginx-only.** A static Vercel deployment cannot vary on a request header; it would need an edge function. Production currently serves from the Docker image, so the negotiation is live — but `/index.md`, the `<link rel="alternate">` and the `Link` header all point at the same content, so a host without it loses nothing but a shortcut.
+**This is nginx-only.** A static Vercel deployment cannot vary on a request header; it would need an edge function. Production currently serves from the Docker image, so the negotiation is live — but the `.md` routes, the `<link rel="alternate">` and the `Link` header all point at the same content, so a host without it loses nothing but a shortcut.
+
+The article `Link` headers in `vercel.json` interpolate `:slug` from the `source` pattern into the header value. That is documented behaviour but **has never been exercised on a real Vercel deployment here** — if the site ever moves back, check it with `curl -I` and fall back to a static value naming only the sitemap, `/llms.txt` and the feed if it does not hold.
 
 ### add_header does not merge across levels
 
-nginx inherits `add_header` from an outer level **only when the current level declares none of its own**. One `add_header` in a `location` silently drops every server-level header for that location. Every location in `nginx.conf.template` that sets a header therefore repeats the full set — the three security headers, plus `Link`. This is easy to get wrong: adding a `Cache-Control` to a location and nothing else will quietly remove `nosniff` from it.
+nginx inherits `add_header` from an outer level **only when the current level declares none of its own**. One `add_header` in a `location` silently drops every server-level header for that location. Every location in `nginx.conf.template` that sets a header therefore repeats the full set — the three security headers, plus `Link`. This is easy to get wrong: adding a `Cache-Control` to a location and nothing else will quietly remove `nosniff` from it. The two locations that set no headers at all (`/site.webmanifest`, `/rss.xml`) are correct precisely because they declare none and inherit everything.
 
 ### Web Bot Auth is deliberately absent
 
@@ -145,7 +222,7 @@ AgentReady lists Web Bot Auth (RFC 9421 HTTP message signatures, via `/.well-kno
 
 ## Social Cards
 
-`Layout.astro` emits the Open Graph, Twitter and JSON-LD metadata. `og:image` defaults to `/og.png` and can be overridden per page with the layout's `image` prop.
+`Layout.astro` emits the Open Graph, Twitter and JSON-LD metadata. `og:image` defaults to `/og.png` and can be overridden per page with the layout's `image` prop. Articles do not override it — there is no per-article card generator, and one would have to be a build step rather than the committed-artifact arrangement `npm run og` uses.
 
 The JSON-LD is a `@graph` of four nodes — `ProfilePage`, `WebSite`, `Person` and the `Book` — cross-referenced by `@id` rather than nested. Keeping them as separate nodes is what lets a consumer distinguish "this page is *about* him" from "he *wrote* this"; flattening it back into a single `Person` loses that. `personId` is the stable anchor every other node points at, so it must not change.
 
@@ -174,41 +251,6 @@ Each size is resampled straight from the source crop rather than from a shared m
 When previewing output, note that **chained `.resize()` calls in one sharp pipeline collapse to the last one** — `sharp(f).resize(16,16).resize(160,160)` renders at 160, not a magnified 16. Small-size checks need two separate pipelines.
 
 There is deliberately **no SVG favicon** — browsers prefer `image/svg+xml` over every other `rel="icon"`, so one would silently beat the photo. The old `h` glyph at `public/favicon.svg` was removed for exactly that reason; do not reinstate it without also dropping the PNGs.
-
-## Background Music
-
-`AudioPlayer.astro`, in the homepage header only — 404 shares `Layout` but not that header. Track metadata is `backgroundTrack` in `src/data/music.ts`; the audio itself is `public/reaxis-liquid-alchemy-loop.{ogg,mp3}`.
-
-### The state model — read this before touching the script
-
-Two independent flags. Everything visible is derived from both, and **nothing reads `audio.paused` to decide what the UI shows.**
-
-| Flag | Means | Changed by | Persisted |
-| --- | --- | --- | --- |
-| `intent` | the visitor wants sound | **only** a click on the toggle | yes, `localStorage['music']` |
-| `unlocked` | the browser is allowing playback | `play()` resolving or rejecting | never |
-
-`soundOn = intent && unlocked`, computed in one place (`render()`).
-
-**The `visibilitychange` handler calls `audio.pause()` and touches neither flag.** That is exactly what makes "pause → switch tabs → return" stay paused while "playing → switch tabs → return" resumes. Collapsing these into one boolean is the bug this design exists to prevent — if you find yourself adding a third piece of state, you are probably about to reintroduce it.
-
-### The rest of the load-bearing details
-
-- **Autoplay is attempted, not assumed.** Browsers require a user gesture for audible playback, so `attemptPlay()` falls back to arming gesture listeners via an `AbortController`. Those listeners are dropped only once a `play()` actually **resolves** — never on the first event to arrive, or a scroll spends the one attempt on browsers that do not count scrolling as activation.
-- **Muting calls `disarm()`.** Otherwise a later scroll restarts music the visitor just turned off.
-- **The click handler branches on `intent && unlocked`, not `intent`.** While autoplay is blocked the button reads "play" even though intent is already true; clicking must start playback, not flip an invisible flag.
-- **The `sound-on:` variant** in `global.css` drives the icon swap in pure CSS, mirroring `dark:`. Unlike `dark:` it has **no pre-paint script**, deliberately: at first paint nothing is playing whatever `localStorage` says, because the browser has not ruled on autoplay yet. "Off" is the only honest initial render.
-- **`preload="none"`.** Most visitors' autoplay is refused and some never interact; eagerly fetching ~0.8 MB of audio they may never hear would compete with the fonts and the avatar for early bandwidth.
-- **Opus is offered first, MP3 second.** MP3 carries encoder padding that `loop` cannot skip, so it seams audibly on every restart — on techno that reads as a dropped beat. Opus stores its pre-skip in the container and every decoder honours it. The `.ogg` extension rather than `.opus` is deliberate: nginx's `mime.types` has `audio/ogg ogg` and **no** `.opus` entry.
-- **Never ship a `.mpeg` extension.** nginx maps it to `video/mpeg`, and `nginx.conf.template` already sends `X-Content-Type-Options: nosniff`, so the browser is forbidden from sniffing past the wrong type. It works in `astro dev` and fails in production — the worst failure shape there is.
-- **The info panel has three independent reasons to be open** — pointer over it, focus inside it, or `stuck` (a tap held it). It closes only when none holds. Hand-rolled rather than the native `popover` attribute: a popover is promoted to the top layer, whose containing block is the viewport, so `absolute top-full right-0` cannot anchor to the button. It uses the `hidden` **attribute** rather than an opacity utility, which takes the Spotify link out of the tab order when closed.
-- **`stuck` is what makes touch work, and it is not optional.** A touch pointer stops existing when the finger lifts, so the browser fires `pointerleave` immediately after `pointerup` — the hover path alone opens the panel and shuts it again in milliseconds. Focus is no backstop either: **iOS Safari does not focus a `<button>` on tap**, so the `focusin` branch never runs there. Only `pointerType === 'touch'` sticks, so mouse behaviour is untouched. Dismissed by an outside tap, Escape, or scrolling; all three go through `dismiss()` so the flag is never left set behind a hidden panel.
-- **No `aria-pressed` on the play/pause button.** Its accessible name already changes between "Play background music" and "Pause background music"; adding `aria-pressed` on top produces the "paused, pressed" double-negation. Pick one mechanism, not both.
-
-### Limits worth knowing before "fixing" them
-
-- **OS-level muting is undetectable.** Device muted, tab muted in Chrome, or the iOS ringer switch — `play()` resolves, `unlocked` goes true, and the button reads "Pause" while nothing is audible. No API exposes this. Do not try to infer it from `AudioContext` state; the heuristics are unreliable and guessing wrong is worse.
-- **`prefers-reduced-motion` does not apply to audio.** It is a motion query and there is no reduced-sound equivalent. Gating playback on it would invent a preference the visitor never expressed.
 
 ## Analytics
 
@@ -245,12 +287,10 @@ Light and dark, toggled by `ThemeToggle.astro` in the header.
 
 Two tokens carry the terminal green, and they are **theme-asymmetric on purpose**:
 
-- `--color-terminal` (`#0f7d45` light, `#3ff08a` dark) — the blinking block caret and the background-music play/pause icon. Those two, and nothing else.
+- `--color-terminal` (`#0f7d45` light, `#3ff08a` dark) — the blinking block caret. That, and nothing else.
 - `--color-label` (`#71716b` light, `#3ff08a` dark) — the six section labels. Green works against the dark page but turns into a lime highlighter on the warm light page, so **light deliberately keeps the muted gray**. Do not "fix" this into a single value.
 
 The green is the only hue on the site and it stays scarce; do not extend it to links, tags or body headings. Label contrast holds either way: 4.58:1 light, 12.53:1 dark.
-
-The play/pause icon is the one deliberate extension beyond the caret: it marks the only control on the page that makes noise, which is worth one glance of colour. It is an icon rather than text, so it answers to the 3:1 non-text contrast threshold — `#0f7d45` on the light page clears that comfortably. The theme toggle beside it deliberately stays `gray-400`; two green controls side by side would spend the scarcity for nothing.
 
 ### Color Palette
 

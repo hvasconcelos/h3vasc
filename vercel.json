@@ -7,7 +7,7 @@
       "headers": [
         {
           "key": "Link",
-          "value": "</index.md>; rel=\"alternate\"; type=\"text/markdown\", </sitemap.xml>; rel=\"sitemap\", </llms.txt>; rel=\"describedby\""
+          "value": "</index.md>; rel=\"alternate\"; type=\"text/markdown\", </sitemap.xml>; rel=\"sitemap\", </llms.txt>; rel=\"describedby\", </rss.xml>; rel=\"alternate\"; type=\"application/rss+xml\""
         }
       ]
     },
@@ -21,6 +21,28 @@
         {
           "key": "Access-Control-Allow-Origin",
           "value": "*"
+        }
+      ]
+    },
+    {
+      "source": "/articles/:slug.md",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "</articles/:slug>; rel=\"alternate\"; type=\"text/html\", </sitemap.xml>; rel=\"sitemap\", </llms.txt>; rel=\"describedby\""
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "source": "/articles/:slug",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "</articles/:slug.md>; rel=\"alternate\"; type=\"text/markdown\", </sitemap.xml>; rel=\"sitemap\", </llms.txt>; rel=\"describedby\", </rss.xml>; rel=\"alternate\"; type=\"application/rss+xml\""
         }
       ]
     }

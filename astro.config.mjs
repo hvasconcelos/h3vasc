@@ -28,6 +28,13 @@ export default defineConfig({
   site: 'https://hvasc.dev',
   // Fully static output — the built site in dist/ is plain HTML/CSS/JS.
   output: 'static',
+  build: {
+    // `dist/articles/<slug>.html` rather than `<slug>/index.html`, so a page's
+    // URL is `/articles/<slug>` with no trailing slash and its Markdown twin
+    // sits beside it as `<slug>.md`. nginx matches both on a clean $uri —
+    // see the $agent_link map and the .md locations in nginx.conf.template.
+    format: 'file',
+  },
   markdown: {
     processor: satteri({ hastPlugins: [externalLinks] }),
   },

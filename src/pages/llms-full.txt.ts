@@ -1,16 +1,16 @@
 import type { APIRoute } from 'astro'
-import { renderSiteMarkdown } from '../lib/content'
+import { renderLlmsFullTxt } from '../lib/content'
 
 /**
  * llms-full.txt — the whole site in one fetch, for an agent that would rather
  * ingest everything than follow the links in /llms.txt.
  *
- * Byte-identical to /index.md, and deliberately so: the site is a single page,
- * so "the full content" and "the homepage as Markdown" are the same document.
- * Both exist because they answer to different conventions — /index.md is the
- * Markdown twin advertised by <link rel="alternate">, this is the llms.txt
- * companion file — and an agent looking for one will not think to try the
- * other. Rendering both from renderSiteMarkdown is what keeps that free.
+ * It used to be byte-identical to /index.md, back when the site was one page
+ * and "everything" and "the homepage" were the same document. Self-hosted
+ * articles ended that: this file is now the profile followed by every article
+ * in full, which is what the convention promises, while /index.md stays the
+ * Markdown twin of the page it is named after — a document that lists the
+ * writing rather than containing it.
  *
  * text/plain rather than text/markdown, unlike /index.md: the built file is
  * `llms-full.txt`, and nginx serves .txt from its bundled mime.types as
@@ -18,7 +18,7 @@ import { renderSiteMarkdown } from '../lib/content'
  * identical instead of quietly disagreeing, and saves a second `types { }`
  * block in nginx.conf.template.
  */
-export const GET: APIRoute = ({ site }) =>
-  new Response(renderSiteMarkdown(site?.origin ?? ''), {
+export const GET: APIRoute = async ({ site }) =>
+  new Response(await renderLlmsFullTxt(site?.origin ?? ''), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   })
