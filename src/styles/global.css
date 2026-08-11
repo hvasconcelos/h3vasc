@@ -189,6 +189,29 @@
     fill: var(--color-gray-600);
   }
 
+  /* Diagram parts. A box is the page one step up rather than an outline in a
+     louder gray — the border does the separating, the fill only lifts it. */
+  & .sb-box {
+    fill: var(--color-gray-50);
+    stroke: var(--color-gray-200);
+    stroke-width: 1;
+  }
+
+  & .sb-link {
+    fill: none;
+    stroke: var(--color-gray-400);
+    stroke-width: 1;
+  }
+
+  /* Escalation is the exceptional path, so it is drawn as one. */
+  & .sb-link--dashed {
+    stroke-dasharray: 3 3;
+  }
+
+  & .sb-arrow {
+    fill: var(--color-gray-400);
+  }
+
   & figcaption {
     color: var(--color-gray-500);
     font-size: var(--text-xs);

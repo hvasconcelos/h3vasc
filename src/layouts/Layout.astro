@@ -9,6 +9,11 @@ interface Props {
   description: string
   /** Overrides the default social card. Must be a path under public/. */
   image?: string
+  /** Describes that card. Only worth setting alongside a custom `image`. */
+  imageAlt?: string
+  /** The card's real pixel size. Defaults to /og.png's. */
+  imageWidth?: number
+  imageHeight?: number
   /** The Markdown twin of this page, advertised as rel="alternate". */
   markdown?: string
   /**
@@ -21,7 +26,13 @@ interface Props {
 const {
   title,
   description,
-  image = '/og.png',
+  // `image ?? '/og.png'` rather than a default parameter: a page that computes
+  // its card from data passes undefined explicitly when there isn't one, and a
+  // default only fires on a missing key.
+  image,
+  imageAlt = 'Hélder Vasconcelos — Chief Technology Officer at LayerX',
+  imageWidth = 1200,
+  imageHeight = 630,
   markdown = '/index.md',
   article,
 } = Astro.props
@@ -36,7 +47,7 @@ const pathname = Astro.url.pathname
   .replace(/index\.html$/, '')
   .replace(/\.html$/, '')
 const canonical = new URL(pathname, Astro.site)
-const socialImage = new URL(image, Astro.site)
+const socialImage = new URL(image ?? '/og.png', Astro.site)
 
 // Stable @id for the Person node, referenced from every other node in the
 // JSON-LD graph below.
@@ -268,12 +279,9 @@ const umamiSrc =
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={socialImage} />
     <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta
-      property="og:image:alt"
-      content="Hélder Vasconcelos — Chief Technology Officer at LayerX"
-    />
+    <meta property="og:image:width" content={String(imageWidth)} />
+    <meta property="og:image:height" content={String(imageHeight)} />
+    <meta property="og:image:alt" content={imageAlt} />
     {/*
       og:type decides which of these two sets is meaningful, so only one of them
       is emitted — profile:* on an article is ignored at best and misread at worst.
@@ -303,10 +311,7 @@ const umamiSrc =
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
-    <meta
-      name="twitter:image:alt"
-      content="Hélder Vasconcelos — Chief Technology Officer at LayerX"
-    />
+    <meta name="twitter:image:alt" content={imageAlt} />
 
     <script
       type="application/ld+json"

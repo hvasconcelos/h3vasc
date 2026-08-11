@@ -3,7 +3,12 @@ import { render } from 'astro:content'
 import type { InferGetStaticPropsType } from 'astro'
 import Layout from '../../layouts/Layout.astro'
 import ThemeToggle from '../../components/ThemeToggle.astro'
-import { formatArticleDate, getArticles, isoDate } from '../../lib/articles'
+import {
+  formatArticleDate,
+  getArticles,
+  isoDate,
+  titleLines,
+} from '../../lib/articles'
 
 export async function getStaticPaths() {
   const articles = await getArticles()
@@ -25,6 +30,10 @@ const { Content } = await render(article.entry)
   title={`${article.title} — Hélder Vasconcelos`}
   description={article.description}
   markdown={article.markdownHref}
+  image={article.cover}
+  imageAlt={`${article.title} — an essay by Hélder Vasconcelos`}
+  imageWidth={article.coverWidth}
+  imageHeight={article.coverHeight}
   article={{ date: article.date, tags: article.tags }}
 >
   {/*
@@ -54,11 +63,18 @@ const { Content } = await render(article.entry)
         Same rank as the name on the homepage, and set at the same size: this
         is the page's subject, and an article that opens smaller than the h1 of
         a profile page reads as the lesser of the two.
+
+        Broken by sentence rather than balanced: `text-balance` evens the line
+        lengths, which on a two-sentence title puts the break wherever the
+        arithmetic lands — mid-clause as often as not. `text-pretty` still
+        guards against a widow inside a line that has to wrap on its own.
       */}
       <h1
-        class="mb-4 text-3xl font-medium tracking-tight text-balance text-gray-900 sm:text-4xl"
+        class="mb-4 text-3xl font-medium tracking-tight text-pretty text-gray-900 sm:text-4xl"
       >
-        {article.title}
+        {titleLines(article.title).map((line, i) => (
+          <Fragment>{i > 0 && <br />}{line}</Fragment>
+        ))}
       </h1>
       {/* A step above the metadata elsewhere on the site — here it is the only
           thing between the title and the body, so it carries the byline. */}
@@ -76,6 +92,26 @@ const { Content } = await render(article.entry)
         }
       </div>
     </header>
+
+    {/*
+      The cover, where a magazine would put it: under the masthead, above the
+      first line. It carries the title as artwork and the h1 above carries it as
+      text, so the alt describes the picture and lets the heading do the rest —
+      a screen reader that heard the title twice would learn nothing the second
+      time. Dimensions are explicit so the body copy doesn't jump when it loads.
+    */}
+    {
+      article.cover && (
+        <img
+          src={article.cover}
+          alt={article.coverAlt ?? ''}
+          width={article.coverWidth}
+          height={article.coverHeight}
+          fetchpriority="high"
+          class="mb-12 block w-full border border-gray-200"
+        />
+      )
+    }
 
     <article class="prose">
       <Content />

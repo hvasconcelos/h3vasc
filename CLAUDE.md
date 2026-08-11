@@ -124,6 +124,8 @@ The column is `max-w-3xl`, one step wider than the `max-w-2xl` every other page 
 
 Body copy is the `prose` utility in `global.css` — a plain CSS block over `p`, `h2`/`h3`, lists, `code`, `blockquote`, tables and links. It reaches only for `--color-gray-*` and `--color-accent`, so it themes with everything else and needs no `dark:`. The bio keeps its own inline `[&_a]:…` chain — it has a justify/hyphens treatment this does not.
 
+The h1 breaks by sentence, not by `text-balance`. `titleLines()` in `src/lib/articles.ts` splits the title on sentence-ending punctuation and the page joins the parts with `<br>`, so a two-sentence title reads the way it was written instead of breaking wherever the column runs out. It is a rule rather than a `titleLines` frontmatter field, which would duplicate the title and drift from it; each line still wraps on its own when the viewport is narrower than it. A title carrying an abbreviation would break inside it.
+
 Headings carry their weight typographically: one size step (`--text-lg`, 17px, added to the scale for exactly this), weight 600, and a 3rem gap above against 0.875rem below — a heading belongs to what follows it. An earlier revision prefixed them with `## ` from a `::before`. It read as unrendered Markdown, and generated content lands inside a selection, so copying a heading took the hashes with it. **Do not reinstate it.**
 
 ### Charts are inline SVG, not images
@@ -132,7 +134,9 @@ A scoreboard in an article is a `<figure class="scoreboard">` holding a hand-wri
 
 Inline rather than an `<img>` because every fill resolves through `var(--color-gray-*)` and therefore follows the theme toggle. An external SVG cannot: it gets no access to the document's custom properties, and the site's theme is a `data-theme` attribute rather than `prefers-color-scheme`, so the media-query trick inside the file doesn't reach it either.
 
-Conventions worth keeping: a `640`-wide `viewBox` with 26px rows, labels at `x=0`, the bar track from 208 to 580, values right-aligned at 640. Open-weight models get a `[open]` tag in the site's bracketed idiom rather than a second bar colour. The track behind each bar is what stops a four-cent bar reading as a rendering failure. `role="img"` plus an `aria-label` that states the ranking in words, because a screen reader gets nothing from the bars, and a `<figcaption>` naming the source and its date — the numbers go stale and the caption is what dates them.
+The same classes carry diagrams, not just bar charts — `sb-box`, `sb-link`, `sb-link--dashed` and `sb-arrow` build boxes and connectors out of the same grays, which is why the router diagram in the conclusion sits beside the two scoreboards without looking imported. A dashed link means an exceptional path.
+
+Conventions worth keeping: a `640`-wide `viewBox` with 26px rows, labels at `x=0`, the bar track from 208 to 580, values right-aligned at 640. Open-weight models get a `[open]` tag in the site's bracketed idiom rather than a second bar colour. **Text has no wrapping in SVG**, so check for collisions by rasterising before committing — roughly 6.6px per character at 11px, 6px at 10px — rather than trusting the source to look balanced. The track behind each bar is what stops a four-cent bar reading as a rendering failure. `role="img"` plus an `aria-label` that states the ranking in words, because a screen reader gets nothing from the bars, and a `<figcaption>` naming the source and its date — the numbers go stale and the caption is what dates them.
 
 The SVG scrolls rather than shrinks below `34rem` (`overflow-x: auto` on the figure, `min-width` on the svg). Scaled to phone width, an 11px label would render at about 5px.
 
@@ -222,11 +226,30 @@ AgentReady lists Web Bot Auth (RFC 9421 HTTP message signatures, via `/.well-kno
 
 ## Social Cards
 
-`Layout.astro` emits the Open Graph, Twitter and JSON-LD metadata. `og:image` defaults to `/og.png` and can be overridden per page with the layout's `image` prop. Articles do not override it — there is no per-article card generator, and one would have to be a build step rather than the committed-artifact arrangement `npm run og` uses.
+`Layout.astro` emits the Open Graph, Twitter and JSON-LD metadata. `og:image` defaults to `/og.png` and can be overridden per page with the layout's `image` prop, with `imageAlt` to describe it. Articles override both from their `cover` frontmatter — see Article covers below.
+
+The `image` prop has no default parameter value; the fallback is `image ?? '/og.png'` at the point of use. An article passes `undefined` explicitly when it has no cover, and a default parameter only fires on a missing key.
 
 The JSON-LD is a `@graph` of four nodes — `ProfilePage`, `WebSite`, `Person` and the `Book` — cross-referenced by `@id` rather than nested. Keeping them as separate nodes is what lets a consumer distinguish "this page is *about* him" from "he *wrote* this"; flattening it back into a single `Person` loses that. `personId` is the stable anchor every other node points at, so it must not change.
 
 `public/og.png` is generated by `scripts/generate-og.mjs` (`npm run og`) and **committed** — it is not produced during `astro build`, so regenerate and commit it after changing the avatar or the strings in that script. The script rasterises an SVG with sharp, which resolves fonts through the system rather than the site's webfonts, so the families it references must be ones macOS ships (Inter Display, Menlo). Do not switch it to JetBrains Mono: that font is only present as a webfont here.
+
+### Article covers
+
+`scripts/generate-article-cover.mjs` (`npm run cover`) runs the two mechanical steps either side of designing a cover in Figma:
+
+| Step | In | Out |
+| --- | --- | --- |
+| plate | `articles/assets/<slug>-source.png` | `articles/assets/<slug>-plate.png`, fitted to 1200×630 |
+| card | `articles/assets/<slug>-card.png` (the Figma export) | `public/articles/<slug>.png` |
+
+**The Figma export is an input, never an output.** Nothing in the script writes to a file a person made, so re-running it cannot destroy the design. Point the article's `cover` frontmatter at the published card and describe it in `coverAlt`; absent a cover, the article falls back to the site card.
+
+**The ground is the site's `--color-page`, not the artwork's.** Both steps do it. A drawing arrives on its own near-black a few points off — Figma exports on whatever the artboard was given, cool where this site is warm — and the card then meets the article page with a visible seam. `reground()` maps the source's measured ground onto `--color-page` per channel and stretches everything above it to fit, so the ground lands exactly and 255 stays 255. An earlier revision subtracted the floor and screened instead, which does the first half but drags white type down to about 237; on a card whose whole job is legibility that is the wrong thing to give away. Setting the Figma artboard to `#14120b` makes step 2 a no-op, which is the better fix if you remember.
+
+**Cover dimensions are read, not declared.** `pngSize()` in `src/lib/articles.ts` pulls width and height out of the PNG's IHDR — twenty-four bytes off the front, no decode, no dependency — and they feed both the `<img>` and `og:image:width`/`height`. A Figma re-export at another size would otherwise leave the page reserving the wrong aspect ratio and the metadata lying, and neither is visible in review. It uses `process.cwd()` rather than `import.meta.url`, since the module is bundled before it runs and its own URL by then points into the build output. `@types/node` is a devDependency for exactly this.
+
+**Set the type in JetBrains Mono**, the site's own face — not Menlo. An earlier revision of this script lettered the card itself and had to use Menlo, because sharp rasterises through librsvg, which resolves families through the system and cannot see a webfont. Figma has no such limit, so the card matches the page.
 
 ## Favicons and App Icons
 

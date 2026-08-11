@@ -3,6 +3,8 @@ title: "The AGI Race Has Two Scoreboards. You Only Need One."
 date: 2026-08-11
 description: "The AGI race has two scoreboards and only one gets reported. The other one says your model choice stopped being a choice and became a routing policy."
 tags: [ai, open-weights, llm, inference, infrastructure, agents]
+cover: /articles/agi-two-scoreboards.png
+coverAlt: "A wireframe isometric drawing of the Eiffel Tower on a dark measuring grid, its upper platform picked out in phosphor green"
 ---
 
 Yesterday Mark Zuckerberg published fourteen pages arguing that American open-source AI needs fewer restrictions to compete with China, and shipped Muse Glimmer to prove he meant it. Meta has committed to opening the weights of Muse Spark 1.2 as well. That was the model it launched in April as its first closed, proprietary frontier system, the one that was supposed to end the Llama era.
@@ -185,6 +187,40 @@ What doesn't expire is the shape of the problem. There is a ceiling and there is
 
 So stop asking which model to use. That question has had no stable answer for about a year, and the release calendar it depends on isn't yours. Ask what a wrong answer costs you instead, and let that sort your traffic. That one you can answer, and the answer only changes when your product does.
 
+<figure class="scoreboard">
+  <svg viewBox="0 0 640 268" role="img" aria-label="Diagram of a model router. Calls arrive at a router gated by an eval set, which sorts them by what a wrong answer costs. Cheap-to-be-wrong calls, eighty to ninety percent of tokens, go to self-hosted open weights costing four to ninety-four cents per task. Expensive-to-be-wrong calls go to the hosted frontier at one to two dollars per task. A dashed path shows the cheap tier escalating to the frontier on failure.">
+    <text class="sb-title" x="0" y="12">ROUTING POLICY</text>
+    <text class="sb-source" x="640" y="12" text-anchor="end">tiered by what a wrong answer costs</text>
+    <line class="sb-rule" x1="0" y1="24" x2="640" y2="24" />
+    <text class="sb-label" x="0" y="150">your calls</text>
+    <path class="sb-link" d="M70 146 H98" />
+    <polygon class="sb-arrow" points="104,146 97,142 97,150" />
+    <rect class="sb-box" x="104" y="118" width="132" height="56" />
+    <text class="sb-value" x="170" y="142" text-anchor="middle">ROUTER</text>
+    <text class="sb-tag" x="170" y="158" text-anchor="middle">gate: your eval set</text>
+    <path class="sb-link" d="M236 146 H268 V81 H294" />
+    <polygon class="sb-arrow" points="300,81 293,78 293,84" />
+    <path class="sb-link" d="M236 146 H268 V223 H294" />
+    <polygon class="sb-arrow" points="300,223 293,220 293,226" />
+    <rect class="sb-box" x="300" y="48" width="340" height="66" />
+    <text class="sb-value" x="312" y="68">cheap to be wrong</text>
+    <text class="sb-tag" x="628" y="68" text-anchor="end">80–90% of tokens</text>
+    <text class="sb-label" x="312" y="86">self-hosted, open weights</text>
+    <text class="sb-tag" x="312" y="104">DeepSeek V4 Pro · Kimi K3</text>
+    <text class="sb-tag" x="628" y="104" text-anchor="end">$0.04–$0.94 / task</text>
+    <rect class="sb-box" x="300" y="190" width="340" height="66" />
+    <text class="sb-value" x="312" y="210">expensive to be wrong</text>
+    <text class="sb-tag" x="628" y="210" text-anchor="end">the thin layer</text>
+    <text class="sb-label" x="312" y="228">hosted frontier, unattended work</text>
+    <text class="sb-tag" x="312" y="246">Claude Opus 5 · GPT-5.6 Sol</text>
+    <text class="sb-tag" x="628" y="246" text-anchor="end">$1.04–$2.03 / task</text>
+    <path class="sb-link sb-link--dashed" d="M372 114 V183" />
+    <polygon class="sb-arrow" points="372,190 368.5,183 375.5,183" />
+    <text class="sb-tag" x="382" y="156">escalate on failure, and count it</text>
+  </svg>
+  <figcaption>The whole policy on one page. Two tiers sorted by what a wrong answer costs, one gate, and an escalation path that reports what it spent. Nothing in it is research. Model costs from Artificial Analysis, August 2026.</figcaption>
+</figure>
+
 The work is unglamorous. An eval set that looks like your actual traffic. A cost-per-completed-task number you trust more than a price table. An escalation path with metrics on it rather than a retry buried in a try/except. An abstraction thin enough that swapping a provider is a config change and a re-run of the evals. None of it is research, and none of it will be on a launch slide. It's the difference between a six-week-old model choice costing you an afternoon and costing you a quarter.
 
-Build the second scoreboard. It's the only one that answers to you.
+Build the second scoreboard. It's the only one that matters to you.

@@ -5,6 +5,8 @@
  * `.md` twin, the feed, the sitemap and `/index.md` all come through here, so
  * they cannot drift apart.
  */
+import { closeSync, openSync, readSync } from 'node:fs'
+import { join } from 'node:path'
 import { getCollection, type CollectionEntry } from 'astro:content'
 import { blogPosts, type BlogPost } from '../data/writing'
 
@@ -21,6 +23,41 @@ export interface Article {
   date: Date
   description: string
   tags: string[]
+  /** Social card for this piece, or undefined to fall back to /og.png. */
+  cover?: string
+  coverAlt?: string
+  /** Read off the file, so a re-export at another size can't go stale. */
+  coverWidth?: number
+  coverHeight?: number
+}
+
+/**
+ * A PNG's dimensions, straight out of its IHDR: 8 bytes of signature, a chunk
+ * length, the tag, then width and height as big-endian uint32s. Twenty-four
+ * bytes off the front of the file, no decode and no dependency.
+ *
+ * Worth reading rather than declaring in frontmatter. The page needs the real
+ * ratio to reserve space for the image, and og:image:width has to match what
+ * is actually served; both go quietly wrong the first time a cover is
+ * re-exported at another size, and neither failure is visible in review.
+ *
+ * `process.cwd()` rather than `import.meta.url`: this module is bundled before
+ * it runs, and its own URL by then points into the build output.
+ */
+function pngSize(publicPath: string) {
+  try {
+    const fd = openSync(join(process.cwd(), 'public', publicPath), 'r')
+    const header = Buffer.alloc(24)
+    readSync(fd, header, 0, 24, 0)
+    closeSync(fd)
+
+    if (header.toString('ascii', 12, 16) !== 'IHDR') return {}
+    return { width: header.readUInt32BE(16), height: header.readUInt32BE(20) }
+  } catch {
+    // A missing or unreadable cover is not worth failing a build over; the
+    // page falls back to leaving the dimensions off.
+    return {}
+  }
 }
 
 /** Where a self-hosted piece was published, in the Writing list's own format. */
@@ -48,6 +85,7 @@ export async function getArticles(): Promise<Article[]> {
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
     .map((entry) => {
       const slug = articleSlug(entry)
+      const size = entry.data.cover ? pngSize(entry.data.cover) : {}
       return {
         entry,
         slug,
@@ -57,8 +95,29 @@ export async function getArticles(): Promise<Article[]> {
         date: entry.data.date,
         description: entry.data.description,
         tags: entry.data.tags,
+        cover: entry.data.cover,
+        coverAlt: entry.data.coverAlt,
+        coverWidth: size.width,
+        coverHeight: size.height,
       }
     })
+}
+
+/**
+ * A title's display lines. A title made of more than one sentence breaks
+ * between them, so the h1 reads the way the title was written rather than
+ * wherever the column happens to run out.
+ *
+ * A rule instead of a second frontmatter field: a `titleLines` array would
+ * duplicate the title and drift from it the first time one of the two is
+ * edited. Each returned line still wraps on its own if the viewport is
+ * narrower than it, so this sets the preferred break, not a fixed one.
+ *
+ * It splits on sentence-ending punctuation, so a title carrying an
+ * abbreviation ("Pt. 1") would break inside it. Reword or accept it.
+ */
+export function titleLines(title: string): string[] {
+  return title.split(/(?<=[.?!])\s+/).filter(Boolean)
 }
 
 /**
@@ -98,8 +157,12 @@ export function articleMarkdown(article: Article, origin: string): string {
     `# ${article.title}`,
     `> ${article.description}`,
     `*${meta}*`,
+    // The page opens with the cover, so the twin does too.
+    article.cover && `![${article.coverAlt ?? ''}](${origin}${article.cover})`,
     (article.entry.body ?? '').trim(),
-  ].join('\n\n')
+  ]
+    .filter(Boolean)
+    .join('\n\n')
 }
 
 /**

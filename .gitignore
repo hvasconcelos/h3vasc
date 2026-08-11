@@ -28,3 +28,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# Design intermediates: regenerable from the sources by `npm run cover`.
+articles/assets/*-plate.png
