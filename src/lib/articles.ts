@@ -29,6 +29,36 @@ export interface Article {
   /** Read off the file, so a re-export at another size can't go stale. */
   coverWidth?: number
   coverHeight?: number
+  /** Whole minutes, never zero. */
+  readingMinutes: number
+}
+
+/**
+ * 220 words a minute, which is the middle of the range for adult reading and
+ * a little generous for this material.
+ */
+const WORDS_PER_MINUTE = 220
+
+/**
+ * An article's reading time, from its Markdown source.
+ *
+ * The figures come out first. A scoreboard is a hundred lines of SVG carrying
+ * a few dozen labels, and counting either the markup or the labels as prose
+ * would put minutes on the estimate that nobody spends reading. What is left
+ * has its link hrefs and Markdown punctuation dropped, so `[text](url)` counts
+ * as the words a person actually reads.
+ */
+export function readingMinutes(body: string): number {
+  const prose = body
+    .replace(/<figure[\s\S]*?<\/figure>/g, ' ')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[#*_`>|]/g, ' ')
+    .trim()
+
+  const words = prose ? prose.split(/\s+/).length : 0
+  return Math.max(1, Math.round(words / WORDS_PER_MINUTE))
 }
 
 /**
@@ -99,6 +129,7 @@ export async function getArticles(): Promise<Article[]> {
         coverAlt: entry.data.coverAlt,
         coverWidth: size.width,
         coverHeight: size.height,
+        readingMinutes: readingMinutes(entry.body ?? ''),
       }
     })
 }
@@ -147,6 +178,7 @@ export function isoDate(date: Date): string {
 export function articleMarkdown(article: Article, origin: string): string {
   const meta = [
     formatArticleDate(article.date),
+    `${article.readingMinutes} min read`,
     article.tags.length ? article.tags.join(', ') : undefined,
     `${origin}${article.href}`,
   ]

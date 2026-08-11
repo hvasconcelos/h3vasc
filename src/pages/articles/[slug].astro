@@ -9,6 +9,9 @@ import {
   isoDate,
   titleLines,
 } from '../../lib/articles'
+// The name the rest of the site is generated from, rather than a second copy
+// of it in markup.
+import { NAME } from '../../lib/content'
 
 export async function getStaticPaths() {
   const articles = await getArticles()
@@ -54,11 +57,6 @@ const { Content } = await render(article.entry)
     </div>
 
     <header class="mb-10">
-      <p class="mb-4 font-mono text-xs text-gray-500">
-        <span class="text-accent">helder@hvasc</span>:<span class="text-gray-400"
-          >~/articles</span
-        >$ cat {article.slug}.md
-      </p>
       {/*
         Same rank as the name on the homepage, and set at the same size: this
         is the page's subject, and an article that opens smaller than the h1 of
@@ -77,20 +75,34 @@ const { Content } = await render(article.entry)
         ))}
       </h1>
       {/* A step above the metadata elsewhere on the site — here it is the only
-          thing between the title and the body, so it carries the byline. */}
+          thing between the title and the body, so it carries the byline.
+
+          Two rows: when and how long on the first, what it is about on the
+          second. On one row the tags ran on from the date as though they were
+          more of the same, and a long tag list wrapped into it. */}
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span class="font-mono text-sm text-gray-500">{NAME}</span>
+        <span class="font-mono text-sm text-gray-400" aria-hidden="true">·</span>
         <time
           datetime={isoDate(article.date)}
           class="font-mono text-sm text-gray-500"
         >
           {formatArticleDate(article.date)}
         </time>
-        {
-          article.tags.map((tag) => (
-            <span class="font-mono text-sm text-gray-500">[{tag}]</span>
-          ))
-        }
+        <span class="font-mono text-sm text-gray-400" aria-hidden="true">·</span>
+        <span class="font-mono text-sm text-gray-500">
+          {article.readingMinutes} min read
+        </span>
       </div>
+      {
+        article.tags.length > 0 && (
+          <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+            {article.tags.map((tag) => (
+              <span class="font-mono text-sm text-gray-500">[{tag}]</span>
+            ))}
+          </div>
+        )
+      }
     </header>
 
     {/*
