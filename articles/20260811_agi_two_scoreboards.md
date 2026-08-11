@@ -7,7 +7,13 @@ cover: /articles/agi-two-scoreboards.png
 coverAlt: "A wireframe isometric drawing of the Eiffel Tower on a dark measuring grid, its upper platform picked out in phosphor green"
 ---
 
-Yesterday Mark Zuckerberg published fourteen pages arguing that American open-source AI needs fewer restrictions to compete with China, and shipped Muse Glimmer to prove he meant it. Meta has committed to opening the weights of Muse Spark 1.2 as well. That was the model it launched in April as its first closed, proprietary frontier system, the one that was supposed to end the Llama era.
+It is August, which makes this roughly the halfway mark, and I have lost count.
+
+Somewhere around the fourth frontier release in six weeks I stopped keeping a mental table of which model was ahead. They arrive faster than anyone outside a lab can evaluate them. Each one lands with its own benchmark card, its own effort setting, its own quiet choice about how a failure gets counted, and by the time you have worked out whether two of the numbers can even be compared, a third model has shipped. Half of them are open weights now. That used to be the distinguishing feature, and it no longer narrows the field at all.
+
+So I sat down to do the thing I had been putting off since spring, which was to work out properly which model we should be standardising on.
+
+Then yesterday Mark Zuckerberg published fourteen pages arguing that American open-source AI needs fewer restrictions to compete with China, and shipped Muse Glimmer to prove he meant it. Meta has committed to opening the weights of Muse Spark 1.2 as well. That was the model it launched in April as its first closed, proprietary frontier system, the one that was supposed to end the Llama era.
 
 That era lasted four months.
 
@@ -223,4 +229,4 @@ So stop asking which model to use. That question has had no stable answer for ab
 
 The work is unglamorous. An eval set that looks like your actual traffic. A cost-per-completed-task number you trust more than a price table. An escalation path with metrics on it rather than a retry buried in a try/except. An abstraction thin enough that swapping a provider is a config change and a re-run of the evals. None of it is research, and none of it will be on a launch slide. It's the difference between a six-week-old model choice costing you an afternoon and costing you a quarter.
 
-Build the second scoreboard. It's the only one that matters to you.
+Build your mental scoreboard. It's the only one that matters to you.
