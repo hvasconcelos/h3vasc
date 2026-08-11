@@ -31,7 +31,7 @@ export const socialLinks: SocialLink[] = [
   },
   {
     name: 'TAIKAI',
-    url: 'https://taikai.network/heldervasc',
+    url: 'https://taikai.network/h3vasc',
     platform: 'link',
   },
 ]
